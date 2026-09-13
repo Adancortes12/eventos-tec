@@ -178,6 +178,7 @@ export default function DetalleEvento() {
 
           <div className="flex flex-wrap gap-2">
             <button
+              type="button"
               onClick={() => setModalEditarAbierto(true)}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
             >
@@ -328,12 +329,13 @@ export default function DetalleEvento() {
           )}
         </div>
 
-        <ModalEditarEvento
-          evento={evento}
-          abierto={modalEditarAbierto}
-          cerrar={() => setModalEditarAbierto(false)}
-          alActualizar={actualizarEvento}
-        />
+        {modalEditarAbierto && (
+          <ModalEditarEvento
+            evento={evento}
+            cerrar={() => setModalEditarAbierto(false)}
+            alActualizar={actualizarEvento}
+          />
+        )}
       </div>
     </main>
   );

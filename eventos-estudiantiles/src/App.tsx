@@ -1,18 +1,21 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 
+import RutaProtegida from "./components/RutaProtegida";
+import LayoutAdmin from "./components/admin/LayoutAdmin";
+
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import Eventos from "./pages/admin/Eventos";
-import NuevoEvento from "./pages/admin/NuevoEvento";
 import DetalleEvento from "./pages/admin/DetalleEvento";
 import EscanerQR from "./pages/admin/EscanerQR";
-import RutaProtegida from "./components/RutaProtegida";
+
 import RegistroEvento from "./pages/public/RegistroEvento";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Rutas públicas */}
         <Route
           path="/"
           element={
@@ -24,54 +27,46 @@ function App() {
           }
         />
 
-        <Route path="/evento/:codigoEvento" element={<RegistroEvento />} />
-
-        <Route path="/admin/login" element={<Login />} />
-
         <Route
-          path="/admin/eventos/:id/escanear"
-          element={
-            <RutaProtegida>
-              <EscanerQR />
-            </RutaProtegida>
-          }
+          path="/evento/:codigoEvento"
+          element={<RegistroEvento />}
         />
 
+        {/* Login administrador */}
+        <Route
+          path="/admin/login"
+          element={<Login />}
+        />
+
+        {/* Panel administrador */}
         <Route
           path="/admin"
           element={
             <RutaProtegida>
-              <Dashboard />
+              <LayoutAdmin />
             </RutaProtegida>
           }
-        />
+        >
+          <Route
+            index
+            element={<Dashboard />}
+          />
 
-        <Route
-          path="/admin/eventos"
-          element={
-            <RutaProtegida>
-              <Eventos />
-            </RutaProtegida>
-          }
-        />
+          <Route
+            path="eventos"
+            element={<Eventos />}
+          />
 
-        <Route
-          path="/admin/eventos/nuevo"
-          element={
-            <RutaProtegida>
-              <NuevoEvento />
-            </RutaProtegida>
-          }
-        />
+          <Route
+            path="eventos/:id"
+            element={<DetalleEvento />}
+          />
 
-        <Route
-          path="/admin/eventos/:id"
-          element={
-            <RutaProtegida>
-              <DetalleEvento />
-            </RutaProtegida>
-          }
-        />
+          <Route
+            path="eventos/:id/escanear"
+            element={<EscanerQR />}
+          />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

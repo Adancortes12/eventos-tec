@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import { supabase } from "../../lib/supabase";
 
 type ResultadoEscaneo = {
@@ -17,20 +17,57 @@ export default function EscanerQR() {
   const [resultado, setResultado] =
     useState<ResultadoEscaneo | null>(null);
 
+  const [iniciandoCamara, setIniciandoCamara] =
+    useState(true);
+
+  const [errorCamara, setErrorCamara] =
+    useState("");
+
   const procesandoRef = useRef(false);
+  const lectorRef = useRef<Html5Qrcode | null>(null);
 
   useEffect(() => {
-    const scanner = new Html5QrcodeScanner(
-      "lector-qr",
-      {
-        fps: 10,
-        qrbox: {
-          width: 250,
-          height: 250,
-        },
-      },
-      false
-    );
+    if (!id) return;
+
+    const lector = new Html5Qrcode("lector-qr");
+
+    lectorRef.current = lector;
+
+    const iniciarCamara = async () => {
+      try {
+        setIniciandoCamara(true);
+        setErrorCamara("");
+
+        await lector.start(
+          {
+            facingMode: "environment",
+          },
+          {
+            fps: 10,
+            qrbox: {
+              width: 250,
+              height: 250,
+            },
+          },
+          async (textoDecodificado) => {
+            await procesarQr(textoDecodificado.trim());
+          },
+          () => {
+            // Ignoramos los intentos fallidos de lectura.
+          }
+        );
+
+        setIniciandoCamara(false);
+      } catch (error) {
+        console.error(error);
+
+        setErrorCamara(
+          "No se pudo abrir la cámara. Verifica los permisos del navegador."
+        );
+
+        setIniciandoCamara(false);
+      }
+    };
 
     const procesarQr = async (tokenQr: string) => {
       if (procesandoRef.current || !id) {
@@ -57,13 +94,10 @@ export default function EscanerQR() {
 
         setResultado({
           tipo: "error",
-          titulo: "Error al consultar el QR",
+          titulo: "ERROR AL CONSULTAR EL QR",
         });
 
-        setTimeout(() => {
-          procesandoRef.current = false;
-        }, 2500);
-
+        liberarEscaner();
         return;
       }
 
@@ -73,10 +107,7 @@ export default function EscanerQR() {
           titulo: "QR NO VÁLIDO",
         });
 
-        setTimeout(() => {
-          procesandoRef.current = false;
-        }, 2500);
-
+        liberarEscaner();
         return;
       }
 
@@ -86,10 +117,7 @@ export default function EscanerQR() {
           titulo: "ESTE QR NO PERTENECE A ESTE EVENTO",
         });
 
-        setTimeout(() => {
-          procesandoRef.current = false;
-        }, 2500);
-
+        liberarEscaner();
         return;
       }
 
@@ -100,14 +128,13 @@ export default function EscanerQR() {
           nombre: inscripcion.nombre_completo,
           numero: inscripcion.numero_estudiante,
           hora: inscripcion.asistio_en
-            ? new Date(inscripcion.asistio_en).toLocaleString("es-MX")
+            ? new Date(
+                inscripcion.asistio_en
+              ).toLocaleString("es-MX")
             : undefined,
         });
 
-        setTimeout(() => {
-          procesandoRef.current = false;
-        }, 2500);
-
+        liberarEscaner();
         return;
       }
 
@@ -129,10 +156,7 @@ export default function EscanerQR() {
           titulo: "NO SE PUDO REGISTRAR LA ASISTENCIA",
         });
 
-        setTimeout(() => {
-          procesandoRef.current = false;
-        }, 2500);
-
+        liberarEscaner();
         return;
       }
 
@@ -144,30 +168,37 @@ export default function EscanerQR() {
         hora: new Date(ahora).toLocaleString("es-MX"),
       });
 
+      liberarEscaner();
+    };
+
+    const liberarEscaner = () => {
       setTimeout(() => {
         procesandoRef.current = false;
+        setResultado(null);
       }, 2500);
     };
 
-    scanner.render(
-      (textoDecodificado) => {
-        procesarQr(textoDecodificado.trim());
-      },
-      () => {
-        // html5-qrcode genera avisos mientras busca un QR.
-        // No necesitamos mostrarlos.
-      }
-    );
+    iniciarCamara();
 
     return () => {
-      scanner.clear().catch(() => {});
+      const detener = async () => {
+        try {
+          if (lector.isScanning) {
+            await lector.stop();
+          }
+
+          lector.clear();
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      detener();
     };
   }, [id]);
 
   const obtenerEstilosResultado = () => {
-    if (!resultado) {
-      return "";
-    }
+    if (!resultado) return "";
 
     switch (resultado.tipo) {
       case "exito":
@@ -187,8 +218,8 @@ export default function EscanerQR() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 p-4 sm:p-6">
-      <div className="mx-auto max-w-2xl">
+    <div>
+      <div className="mb-6">
         <Link
           to={`/admin/eventos/${id}`}
           className="text-sm font-medium text-blue-600"
@@ -196,48 +227,61 @@ export default function EscanerQR() {
           ← Volver al evento
         </Link>
 
-        <div className="mt-4 rounded-2xl bg-white p-5 shadow sm:p-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Escanear asistencia
-          </h1>
+        <h1 className="mt-4 text-3xl font-bold text-gray-900">
+          Pasar asistencia
+        </h1>
 
-          <p className="mt-2 text-sm text-gray-600">
-            Coloca el código QR del estudiante frente a la cámara.
-          </p>
-
-          <div className="mt-6 overflow-hidden rounded-xl">
-            <div id="lector-qr" />
-          </div>
-
-          {resultado && (
-            <div
-              className={`mt-6 rounded-xl border p-5 text-center ${obtenerEstilosResultado()}`}
-            >
-              <h2 className="text-xl font-bold">
-                {resultado.titulo}
-              </h2>
-
-              {resultado.nombre && (
-                <p className="mt-4 text-lg font-semibold">
-                  {resultado.nombre}
-                </p>
-              )}
-
-              {resultado.numero && (
-                <p className="mt-1">
-                  {resultado.numero}
-                </p>
-              )}
-
-              {resultado.hora && (
-                <p className="mt-3 text-sm">
-                  Hora: {resultado.hora}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+        <p className="mt-2 text-gray-600">
+          Coloca el código QR del estudiante frente a la cámara.
+        </p>
       </div>
-    </main>
+
+      <div className="mx-auto max-w-2xl rounded-2xl bg-white p-4 shadow sm:p-6">
+        {iniciandoCamara && (
+          <div className="mb-4 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-700">
+            Abriendo cámara...
+          </div>
+        )}
+
+        {errorCamara && (
+          <div className="mb-4 rounded-lg bg-red-50 p-4 text-center text-sm text-red-600">
+            {errorCamara}
+          </div>
+        )}
+
+        <div
+          id="lector-qr"
+          className="overflow-hidden rounded-xl"
+        />
+
+        {resultado && (
+          <div
+            className={`mt-5 rounded-xl border p-5 text-center ${obtenerEstilosResultado()}`}
+          >
+            <h2 className="text-xl font-bold">
+              {resultado.titulo}
+            </h2>
+
+            {resultado.nombre && (
+              <p className="mt-4 text-lg font-semibold">
+                {resultado.nombre}
+              </p>
+            )}
+
+            {resultado.numero && (
+              <p className="mt-1">
+                {resultado.numero}
+              </p>
+            )}
+
+            {resultado.hora && (
+              <p className="mt-3 text-sm">
+                Hora: {resultado.hora}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
