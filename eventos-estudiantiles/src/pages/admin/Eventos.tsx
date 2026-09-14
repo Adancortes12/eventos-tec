@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
-import { Link, useOutletContext } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Link,
+  useOutletContext,
+} from "react-router";
+
 import { supabase } from "../../lib/supabase";
 
 type Evento = {
@@ -17,160 +21,388 @@ type ContextoAdmin = {
   abrirModalNuevoEvento: () => void;
 };
 
+type FiltroEstado =
+  | "todos"
+  | "activo"
+  | "finalizado";
+
 export default function Eventos() {
   const { abrirModalNuevoEvento } =
     useOutletContext<ContextoAdmin>();
 
-  const [eventos, setEventos] = useState<Evento[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState("");
+  const [eventos, setEventos] =
+    useState<Evento[]>([]);
+
+  const [busqueda, setBusqueda] =
+    useState("");
+
+  const [filtroEstado, setFiltroEstado] =
+    useState<FiltroEstado>("todos");
+
+  const [cargando, setCargando] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   useEffect(() => {
     const cargarEventos = async () => {
-      const { data, error } = await supabase
-        .from("eventos")
-        .select("*")
-        .order("fecha_evento", { ascending: true });
+      setCargando(true);
+      setError("");
+
+      const { data, error } =
+        await supabase
+          .from("eventos")
+          .select("*")
+          .order("fecha_evento", {
+            ascending: true,
+          });
 
       if (error) {
         console.error(error);
-        setError("No se pudieron cargar los eventos.");
-      } else {
-        setEventos(data ?? []);
+
+        setError(
+          "No se pudieron cargar los eventos."
+        );
+
+        setCargando(false);
+        return;
       }
 
+      setEventos(data ?? []);
       setCargando(false);
     };
 
     cargarEventos();
   }, []);
 
+  const eventosFiltrados =
+    useMemo(() => {
+      const texto =
+        busqueda
+          .trim()
+          .toLowerCase();
+
+      return eventos.filter(
+        (evento) => {
+          const coincideEstado =
+            filtroEstado === "todos" ||
+            evento.estado ===
+              filtroEstado;
+
+          const coincideBusqueda =
+            texto === "" ||
+            evento.nombre
+              .toLowerCase()
+              .includes(texto) ||
+            evento.codigo_evento
+              .toLowerCase()
+              .includes(texto);
+
+          return (
+            coincideEstado &&
+            coincideBusqueda
+          );
+        }
+      );
+    }, [
+      eventos,
+      busqueda,
+      filtroEstado,
+    ]);
+
+  const totalActivos =
+    eventos.filter(
+      (evento) =>
+        evento.estado === "activo"
+    ).length;
+
+  const totalFinalizados =
+    eventos.filter(
+      (evento) =>
+        evento.estado ===
+        "finalizado"
+    ).length;
+
   return (
     <div>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Encabezado */}
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <p className="text-sm font-semibold text-blue-600">
+            Administración
+          </p>
+
+          <h1 className="mt-1 text-3xl font-bold text-slate-900">
             Eventos
           </h1>
 
-          <p className="mt-2 text-gray-600">
-            Administra los eventos registrados en el sistema.
+          <p className="mt-2 text-slate-500">
+            Consulta y administra los eventos registrados.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={abrirModalNuevoEvento}
-          className="w-fit rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white"
+          onClick={
+            abrirModalNuevoEvento
+          }
+          className="w-fit rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
         >
-          Nuevo evento
+          + Nuevo evento
         </button>
       </div>
 
+      {/* Resumen */}
+      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm text-slate-500">
+            Total
+          </p>
+
+          <p className="mt-2 text-3xl font-bold text-slate-900">
+            {eventos.length}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm text-slate-500">
+            Activos
+          </p>
+
+          <p className="mt-2 text-3xl font-bold text-green-600">
+            {totalActivos}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm text-slate-500">
+            Finalizados
+          </p>
+
+          <p className="mt-2 text-3xl font-bold text-slate-600">
+            {totalFinalizados}
+          </p>
+        </div>
+      </div>
+
+      {/* Búsqueda y filtros */}
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="w-full lg:max-w-md">
+            <label className="sr-only">
+              Buscar evento
+            </label>
+
+            <input
+              type="search"
+              value={busqueda}
+              onChange={(e) =>
+                setBusqueda(
+                  e.target.value
+                )
+              }
+              placeholder="Buscar por nombre o código..."
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                setFiltroEstado(
+                  "todos"
+                )
+              }
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                filtroEstado ===
+                "todos"
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Todos
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setFiltroEstado(
+                  "activo"
+                )
+              }
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                filtroEstado ===
+                "activo"
+                  ? "bg-green-600 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Activos
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setFiltroEstado(
+                  "finalizado"
+                )
+              }
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                filtroEstado ===
+                "finalizado"
+                  ? "bg-slate-700 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Finalizados
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Estados */}
       {cargando && (
-        <div className="mt-8 rounded-xl bg-white p-6 shadow">
-          <p className="text-gray-600">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-slate-500">
             Cargando eventos...
           </p>
         </div>
       )}
 
       {error && (
-        <div className="mt-8 rounded-xl bg-red-50 p-5 text-red-600">
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
           {error}
         </div>
       )}
 
-      {!cargando && !error && eventos.length === 0 && (
-        <div className="mt-8 rounded-xl bg-white p-8 text-center shadow">
-          <h2 className="text-lg font-semibold text-gray-900">
-            No hay eventos
-          </h2>
+      {!cargando &&
+        !error &&
+        eventosFiltrados.length ===
+          0 && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <h2 className="font-semibold text-slate-800">
+              No se encontraron eventos
+            </h2>
 
-          <p className="mt-2 text-gray-500">
-            Crea el primer evento para comenzar.
-          </p>
+            <p className="mt-2 text-sm text-slate-500">
+              Prueba otra búsqueda o cambia el filtro.
+            </p>
+          </div>
+        )}
 
-          <button
-            type="button"
-            onClick={abrirModalNuevoEvento}
-            className="mt-5 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white"
-          >
-            Crear evento
-          </button>
-        </div>
-      )}
+      {/* Eventos */}
+      {!cargando &&
+        !error &&
+        eventosFiltrados.length >
+          0 && (
+          <>
+            <div className="mt-6 flex items-center justify-between">
+              <p className="text-sm text-slate-500">
+                Mostrando{" "}
+                {
+                  eventosFiltrados.length
+                }{" "}
+                evento
+                {eventosFiltrados.length !==
+                1
+                  ? "s"
+                  : ""}
+              </p>
+            </div>
 
-      {!cargando && !error && eventos.length > 0 && (
-        <div className="mt-8 grid gap-5">
-          {eventos.map((evento) => (
-            <article
-              key={evento.id}
-              className="rounded-xl bg-white p-5 shadow sm:p-6"
-            >
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-sm font-medium text-blue-600">
-                      {evento.codigo_evento}
-                    </p>
-
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        evento.estado === "activo"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {evento.estado === "activo"
-                        ? "Activo"
-                        : "Finalizado"}
-                    </span>
-                  </div>
-
-                  <h2 className="mt-2 text-xl font-bold text-gray-900">
-                    {evento.nombre}
-                  </h2>
-
-                  {evento.descripcion && (
-                    <p className="mt-2 max-w-2xl text-sm text-gray-600">
-                      {evento.descripcion}
-                    </p>
-                  )}
-
-                  <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500">
-                    <p>
-                      Fecha: {evento.fecha_evento}
-                    </p>
-
-                    <p>
-                      Hora: {evento.hora_evento}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 lg:justify-end">
-                  <Link
-                    to={`/admin/eventos/${evento.id}`}
-                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+            <div className="mt-4 grid gap-4">
+              {eventosFiltrados.map(
+                (evento) => (
+                  <article
+                    key={evento.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6"
                   >
-                    Ver evento
-                  </Link>
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="text-xs font-semibold text-blue-600">
+                            {
+                              evento.codigo_evento
+                            }
+                          </span>
 
-                  {evento.estado === "activo" && (
-                    <Link
-                      to={`/admin/eventos/${evento.id}/escanear`}
-                      className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-                    >
-                      Pasar asistencia
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                              evento.estado ===
+                              "activo"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-slate-200 text-slate-600"
+                            }`}
+                          >
+                            {evento.estado ===
+                            "activo"
+                              ? "Activo"
+                              : "Finalizado"}
+                          </span>
+                        </div>
+
+                        <h2 className="mt-3 text-xl font-bold text-slate-900">
+                          {
+                            evento.nombre
+                          }
+                        </h2>
+
+                        {evento.descripcion && (
+                          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                            {
+                              evento.descripcion
+                            }
+                          </p>
+                        )}
+
+                        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Fecha:
+                            </span>{" "}
+                            {
+                              evento.fecha_evento
+                            }
+                          </p>
+
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Hora:
+                            </span>{" "}
+                            {
+                              evento.hora_evento
+                            }
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 lg:justify-end">
+                        <Link
+                          to={`/admin/eventos/${evento.id}`}
+                          className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                        >
+                          Ver evento
+                        </Link>
+
+                        {evento.estado ===
+                          "activo" && (
+                          <Link
+                            to={`/admin/eventos/${evento.id}/escanear`}
+                            className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                          >
+                            Pasar asistencia
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                )
+              )}
+            </div>
+          </>
+        )}
     </div>
   );
 }

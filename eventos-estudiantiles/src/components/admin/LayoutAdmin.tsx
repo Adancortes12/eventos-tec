@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import {
+  NavLink,
+  Outlet,
+  useNavigate,
+} from "react-router";
 
 import { supabase } from "../../lib/supabase";
 
@@ -15,13 +19,18 @@ export type ContextoAdmin = {
 export default function LayoutAdmin() {
   const navigate = useNavigate();
 
-  const [menuAbierto, setMenuAbierto] = useState(false);
-
-  const [modalNuevoEventoAbierto, setModalNuevoEventoAbierto] =
+  const [menuAbierto, setMenuAbierto] =
     useState(false);
 
-  const [eventoCreado, setEventoCreado] =
-    useState<EventoCreado | null>(null);
+  const [
+    modalNuevoEventoAbierto,
+    setModalNuevoEventoAbierto,
+  ] = useState(false);
+
+  const [
+    eventoCreado,
+    setEventoCreado,
+  ] = useState<EventoCreado | null>(null);
 
   const cerrarSesion = async () => {
     await supabase.auth.signOut();
@@ -29,20 +38,25 @@ export default function LayoutAdmin() {
     navigate("/admin/login");
   };
 
-  const alCrearEvento = (evento: EventoCreado) => {
+  const alCrearEvento = (
+    evento: EventoCreado
+  ) => {
     setModalNuevoEventoAbierto(false);
-
     setEventoCreado(evento);
   };
 
   const verEventoCreado = () => {
-    if (!eventoCreado) return;
+    if (!eventoCreado) {
+      return;
+    }
 
     const id = eventoCreado.id;
 
     setEventoCreado(null);
 
-    navigate(`/admin/eventos/${id}`);
+    navigate(
+      `/admin/eventos/${id}`
+    );
   };
 
   const enlaceClase = ({
@@ -50,22 +64,22 @@ export default function LayoutAdmin() {
   }: {
     isActive: boolean;
   }) =>
-    `block rounded-lg px-4 py-3 text-sm font-medium transition ${
+    `flex items-center rounded-xl px-4 py-3 text-sm font-medium transition ${
       isActive
-        ? "bg-blue-600 text-white"
-        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+        ? "bg-blue-600 text-white shadow-sm"
+        : "text-slate-300 hover:bg-slate-800 hover:text-white"
     }`;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Barra móvil */}
-      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-4 lg:hidden">
+    <div className="min-h-screen bg-slate-100">
+      {/* HEADER MÓVIL */}
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
         <div>
-          <p className="text-lg font-bold text-gray-900">
+          <p className="font-bold text-slate-900">
             Eventos Estudiantiles
           </p>
 
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500">
             Administración
           </p>
         </div>
@@ -73,60 +87,92 @@ export default function LayoutAdmin() {
         <button
           type="button"
           onClick={() =>
-            setMenuAbierto(!menuAbierto)
+            setMenuAbierto(
+              !menuAbierto
+            )
           }
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700"
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
         >
-          {menuAbierto ? "Cerrar" : "Menú"}
+          {menuAbierto
+            ? "Cerrar"
+            : "Menú"}
         </button>
       </header>
 
-      {/* Fondo móvil */}
+      {/* FONDO MÓVIL */}
       {menuAbierto && (
         <button
           type="button"
-          onClick={() => setMenuAbierto(false)}
-          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
+          aria-label="Cerrar menú"
+          onClick={() =>
+            setMenuAbierto(false)
+          }
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
         />
       )}
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <aside
-        className={`fixed left-0 top-0 z-50 h-screen w-72 border-r border-gray-200 bg-white transition-transform lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 h-screen w-72 transform bg-slate-950 text-white transition-transform duration-200 lg:translate-x-0 ${
           menuAbierto
             ? "translate-x-0"
             : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col">
-          <div className="border-b border-gray-200 p-6">
+          {/* LOGO */}
+          <div className="border-b border-slate-800 p-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 font-bold text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-lg font-bold text-white">
                 EA
               </div>
 
               <div>
-                <h1 className="font-bold text-gray-900">
+                <h1 className="font-bold text-white">
                   Eventos
                 </h1>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-slate-400">
                   Panel administrativo
                 </p>
               </div>
             </div>
           </div>
 
-          <nav className="flex-1 space-y-2 p-4">
-            <p className="mb-3 px-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
-              Principal
+          {/* BOTÓN PRINCIPAL */}
+          <div className="p-4 pb-2">
+            <button
+              type="button"
+              onClick={() => {
+                setModalNuevoEventoAbierto(
+                  true
+                );
+
+                setMenuAbierto(
+                  false
+                );
+              }}
+              className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              + Nuevo evento
+            </button>
+          </div>
+
+          {/* NAVEGACIÓN */}
+          <nav className="flex-1 space-y-2 overflow-y-auto p-4">
+            <p className="mb-3 px-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Navegación
             </p>
 
             <NavLink
               to="/admin"
               end
               className={enlaceClase}
-              onClick={() => setMenuAbierto(false)}
+              onClick={() =>
+                setMenuAbierto(
+                  false
+                )
+              }
             >
               Dashboard
             </NavLink>
@@ -134,28 +180,34 @@ export default function LayoutAdmin() {
             <NavLink
               to="/admin/eventos"
               className={enlaceClase}
-              onClick={() => setMenuAbierto(false)}
+              onClick={() =>
+                setMenuAbierto(
+                  false
+                )
+              }
             >
               Eventos
             </NavLink>
-
-            <button
-              type="button"
-              onClick={() => {
-                setModalNuevoEventoAbierto(true);
-                setMenuAbierto(false);
-              }}
-              className="w-full rounded-lg px-4 py-3 text-left text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
-            >
-              Nuevo evento
-            </button>
           </nav>
 
-          <div className="border-t border-gray-200 p-4">
+          {/* USUARIO */}
+          <div className="border-t border-slate-800 p-4">
+            <div className="mb-3 rounded-xl bg-slate-900 p-4">
+              <p className="text-sm font-semibold text-white">
+                Administrador
+              </p>
+
+              <p className="mt-1 text-xs text-slate-400">
+                Gestión de eventos
+              </p>
+            </div>
+
             <button
               type="button"
-              onClick={cerrarSesion}
-              className="w-full rounded-lg border border-red-200 px-4 py-3 text-left text-sm font-medium text-red-600 transition hover:bg-red-50"
+              onClick={
+                cerrarSesion
+              }
+              className="w-full rounded-xl border border-red-900/50 px-4 py-3 text-left text-sm font-medium text-red-400 transition hover:bg-red-950/50"
             >
               Cerrar sesión
             </button>
@@ -163,35 +215,70 @@ export default function LayoutAdmin() {
         </div>
       </aside>
 
-      {/* Contenido */}
+      {/* CONTENIDO */}
       <div className="lg:pl-72">
-        <main className="min-h-screen p-4 sm:p-6 lg:p-8">
+        {/* BARRA SUPERIOR PC */}
+        <header className="hidden h-16 items-center justify-between border-b border-slate-200 bg-white px-8 lg:flex">
+          <div>
+            <p className="text-sm font-medium text-slate-500">
+              Sistema de eventos estudiantiles
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              setModalNuevoEventoAbierto(
+                true
+              )
+            }
+            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+          >
+            + Nuevo evento
+          </button>
+        </header>
+
+        {/* PÁGINA ACTUAL */}
+        <main className="min-h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-7xl">
             <Outlet
               context={{
-                abrirModalNuevoEvento: () =>
-                  setModalNuevoEventoAbierto(true),
+                abrirModalNuevoEvento:
+                  () =>
+                    setModalNuevoEventoAbierto(
+                      true
+                    ),
               }}
             />
           </div>
         </main>
       </div>
 
-      {/* Modal crear evento */}
+      {/* MODAL NUEVO EVENTO */}
       <ModalNuevoEvento
-        abierto={modalNuevoEventoAbierto}
+        abierto={
+          modalNuevoEventoAbierto
+        }
         cerrar={() =>
-          setModalNuevoEventoAbierto(false)
+          setModalNuevoEventoAbierto(
+            false
+          )
         }
         alCrear={alCrearEvento}
       />
 
-      {/* Modal evento creado */}
+      {/* MODAL EVENTO CREADO */}
       {eventoCreado && (
         <ModalEventoCreado
           evento={eventoCreado}
-          cerrar={() => setEventoCreado(null)}
-          verEvento={verEventoCreado}
+          cerrar={() =>
+            setEventoCreado(
+              null
+            )
+          }
+          verEvento={
+            verEventoCreado
+          }
         />
       )}
     </div>
