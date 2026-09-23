@@ -24,14 +24,18 @@ export default function handler(req, res) {
     return;
   }
 
-  const protocol =
-    req.headers["x-forwarded-proto"] ||
-    "http";
+ const appUrl = process.env.APP_URL;
 
-  const host = req.headers.host;
+if (!appUrl) {
+  res.status(500).json({
+    error: "APP_URL no está configurada.",
+  });
 
-  const redirectUri =
-    `${protocol}://${host}/api/sitec/callback`;
+  return;
+}
+
+const redirectUri =
+  `${appUrl}/api/sitec/callback`;
 
   const state =
     randomBytes(32).toString("hex");

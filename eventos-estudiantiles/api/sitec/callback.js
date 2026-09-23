@@ -89,12 +89,18 @@ export default async function handler(req, res) {
       });
     }
 
-    const protocol = req.headers["x-forwarded-proto"] || "http";
+    const appUrl =
+  process.env.APP_URL;
 
-    const host = req.headers.host;
+if (!appUrl) {
+  return res.status(500).json({
+    error:
+      "APP_URL no está configurada.",
+  });
+}
 
-    const redirectUri = `${protocol}://${host}/api/sitec/callback`;
-
+const redirectUri =
+  `${appUrl}/api/sitec/callback`;
     const credenciales = Buffer.from(
       `${SIITEC_CLIENT_ID}:${SIITEC_CLIENT_SECRET}`,
     ).toString("base64");
