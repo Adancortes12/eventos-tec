@@ -52,8 +52,12 @@ export default defineConfig({
       workbox: {
   navigateFallback: "/index.html",
 
-  navigateFallbackDenylist: [
-    /^\/api\//,
+  navigateFallbackAllowlist: [
+    /^\/$/,
+    /^\/evento\/[^/]+$/,
+    /^\/mis-eventos$/,
+    /^\/admin$/,
+    /^\/admin\/.*$/,
   ],
 
   cleanupOutdatedCaches: true,
