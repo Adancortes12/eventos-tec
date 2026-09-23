@@ -51,6 +51,11 @@ export default defineConfig({
 
       workbox: {
   navigateFallback: "/index.html",
+
+  navigateFallbackDenylist: [
+    /^\/api\//,
+  ],
+
   cleanupOutdatedCaches: true,
   clientsClaim: true,
   skipWaiting: true,
