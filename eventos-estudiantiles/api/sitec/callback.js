@@ -129,13 +129,32 @@ const redirectUri =
 
     const datosTokenUsuario = await obtenerJsonSeguro(respuestaTokenUsuario);
 
-    if (!respuestaTokenUsuario.ok || !datosTokenUsuario.access_token) {
-      console.error("Error token usuario SITEc:", datosTokenUsuario);
-
-      return res.status(401).json({
-        error: "No se pudo obtener el token del usuario.",
-      });
+    if (
+  !respuestaTokenUsuario.ok ||
+  !datosTokenUsuario.access_token
+) {
+  console.error(
+    "Error token usuario SITEc:",
+    {
+      status: respuestaTokenUsuario.status,
+      respuesta: datosTokenUsuario,
+      redirectUri,
     }
+  );
+
+  return res.status(401).json({
+    error:
+      "No se pudo obtener el token del usuario.",
+    status:
+      respuestaTokenUsuario.status,
+    detalle:
+      datosTokenUsuario.error ??
+      datosTokenUsuario.error_description ??
+      datosTokenUsuario.respuestaTexto ??
+      "Sin detalle",
+    redirectUri,
+  });
+}
 
     /*
      * 2. USERINFO
