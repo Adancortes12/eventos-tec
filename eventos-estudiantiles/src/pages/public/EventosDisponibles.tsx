@@ -315,7 +315,7 @@ export default function EventosDisponibles() {
             className="flex items-center gap-3"
           >
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-sm font-bold text-white">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1B396A] text-sm font-bold text-white">
               EA
             </div>
 
@@ -355,7 +355,7 @@ export default function EventosDisponibles() {
 
         <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 sm:py-16">
 
-          <p className="font-semibold text-blue-600">
+          <p className="font-semibold text-[#1B396A]">
             Eventos disponibles
           </p>
 
@@ -453,7 +453,7 @@ export default function EventosDisponibles() {
                        */}
                       <div className="flex items-center justify-between gap-3">
 
-                        <p className="text-xs font-semibold text-blue-600">
+                        <p className="text-xs font-semibold text-[#1B396A]">
                           {
                             evento.codigo_evento
                           }
@@ -542,7 +542,7 @@ export default function EventosDisponibles() {
 
                             <Link
                               to="/mis-eventos"
-                              className="mt-3 block text-center text-sm font-semibold text-blue-600 transition hover:text-blue-700"
+                              className="mt-3 block text-center text-sm font-semibold text-[#1B396A] transition hover:opacity-80"
                             >
                               Ver mi código QR
                             </Link>
@@ -550,7 +550,7 @@ export default function EventosDisponibles() {
                         ) : (
                           <Link
                             to={`/evento/${evento.codigo_evento}`}
-                            className="block w-full rounded-xl bg-blue-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-blue-700"
+                            className="block w-full rounded-xl bg-[#1B396A] px-5 py-3 text-center font-semibold text-white transition hover:opacity-90"
                           >
                             Registrarme
                           </Link>
