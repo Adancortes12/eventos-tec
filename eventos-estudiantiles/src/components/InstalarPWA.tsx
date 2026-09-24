@@ -3,17 +3,12 @@ import {
   useState,
 } from "react";
 
-interface BeforeInstallPromptEvent
-  extends Event {
-  prompt: () => Promise<void>;
-
-  userChoice: Promise<{
-    outcome:
-      | "accepted"
-      | "dismissed";
-    platform: string;
-  }>;
-}
+import {
+  limpiarEventoInstalacion,
+  obtenerEventoInstalacion,
+  suscribirseInstalacion,
+  type BeforeInstallPromptEvent,
+} from "../lib/pwaInstall";
 
 function comprobarSiEstaInstalada() {
   const modoStandalone =
@@ -38,7 +33,8 @@ export default function InstalarPWA() {
     setEventoInstalacion,
   ] =
     useState<BeforeInstallPromptEvent | null>(
-      null
+      () =>
+        obtenerEventoInstalacion()
     );
 
   const [
@@ -54,49 +50,40 @@ export default function InstalarPWA() {
   ] = useState("");
 
   useEffect(() => {
-    function manejarPrompt(
-      event: Event
-    ) {
-      event.preventDefault();
+    const actualizar =
+      () => {
+        const evento =
+          obtenerEventoInstalacion();
 
-      setEventoInstalacion(
-        event as BeforeInstallPromptEvent
-      );
-    }
+        setEventoInstalacion(
+          evento
+        );
 
-    function manejarInstalacion() {
-      setInstalada(true);
-      setEventoInstalacion(null);
-    }
+        if (
+          !evento &&
+          comprobarSiEstaInstalada()
+        ) {
+          setInstalada(true);
+        }
+      };
 
-    window.addEventListener(
-      "beforeinstallprompt",
-      manejarPrompt
-    );
-
-    window.addEventListener(
-      "appinstalled",
-      manejarInstalacion
-    );
-
-    return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        manejarPrompt
+    const cancelar =
+      suscribirseInstalacion(
+        actualizar
       );
 
-      window.removeEventListener(
-        "appinstalled",
-        manejarInstalacion
-      );
-    };
+    actualizar();
+
+    return cancelar;
   }, []);
 
   async function instalar() {
     setMensaje("");
 
     /*
-     * Chrome / Android / Edge
+     * Chrome / Edge / Android
+     * cuando el navegador permite
+     * instalación directa.
      */
     if (eventoInstalacion) {
       await eventoInstalacion.prompt();
@@ -111,7 +98,7 @@ export default function InstalarPWA() {
         setInstalada(true);
       }
 
-      setEventoInstalacion(null);
+      limpiarEventoInstalacion();
 
       return;
     }
@@ -126,22 +113,24 @@ export default function InstalarPWA() {
 
     if (esIOS) {
       setMensaje(
-        "En iPhone toca Compartir y después “Agregar a pantalla de inicio”."
+        "Para instalarla, toca Compartir y después “Agregar a pantalla de inicio”."
       );
 
       return;
     }
 
     /*
-     * Otros navegadores
+     * Samsung Internet u otros
+     * navegadores que no entreguen
+     * beforeinstallprompt.
      */
     setMensaje(
-      "Puedes instalar la app desde el menú de tu navegador seleccionando “Instalar aplicación”."
+      "Tu navegador no permite abrir la instalación directamente. Usa el menú del navegador y selecciona “Instalar aplicación” o “Agregar a pantalla de inicio”."
     );
   }
 
   /*
-   * Si ya está instalada,
+   * Dentro de la PWA ya instalada
    * no mostramos el botón.
    */
   if (instalada) {
@@ -204,7 +193,7 @@ export default function InstalarPWA() {
             border
             border-slate-200
             bg-white
-            p-3
+            p-4
             text-left
             text-xs
             font-normal
