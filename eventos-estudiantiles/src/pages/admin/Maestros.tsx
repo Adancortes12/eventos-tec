@@ -181,7 +181,7 @@ export default function Maestros() {
 
         <p className="mt-2 text-gray-600">
           Administra los permisos de los maestros que han iniciado sesión con
-          SITEc.
+          SIITEC.
         </p>
       </div>
 
@@ -199,7 +199,7 @@ export default function Maestros() {
             </p>
 
             <p className="mt-1 text-sm text-gray-500">
-              Aparecerán aquí después de iniciar sesión con SITEc.
+              Aparecerán aquí después de iniciar sesión con SIITEC.
             </p>
           </div>
         ) : (
@@ -208,7 +208,7 @@ export default function Maestros() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-5 py-3 text-sm font-semibold text-gray-600">
-                    Usuario SITEc
+                    Usuario SIITEC
                   </th>
 
                   <th className="px-5 py-3 text-sm font-semibold text-gray-600">

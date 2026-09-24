@@ -72,7 +72,7 @@ export default function SesionSitec() {
           active:scale-[0.98]
         "
       >
-        Iniciar sesión con SITEc
+        Iniciar sesión con SIITEC
       </button>
     );
   }

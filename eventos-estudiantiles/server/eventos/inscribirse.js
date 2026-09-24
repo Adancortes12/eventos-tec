@@ -54,7 +54,7 @@ async function obtenerTokenSitec() {
     process.env;
 
   if (!SIITEC_CLIENT_ID || !SIITEC_CLIENT_SECRET || !SIITEC_TOKEN_ENDPOINT) {
-    throw new Error("Faltan variables de SITEc.");
+    throw new Error("Faltan variables de SIITEC.");
   }
 
   const credenciales = Buffer.from(
@@ -80,7 +80,7 @@ async function obtenerTokenSitec() {
   const datos = await respuesta.json();
 
   if (!respuesta.ok || !datos.access_token) {
-    throw new Error("No se pudo obtener el token de SITEc.");
+    throw new Error("No se pudo obtener el token de SIITEC.");
   }
 
   return datos.access_token;
@@ -113,7 +113,7 @@ async function obtenerEstudianteSitec(numeroEstudiante, sitecUsuarioId) {
   const datos = await respuesta.json();
 
   if (!respuesta.ok || !Array.isArray(datos)) {
-    throw new Error("No se pudo consultar al estudiante en SITEc.");
+    throw new Error("No se pudo consultar al estudiante en SIITEC.");
   }
 
   return (
@@ -327,7 +327,7 @@ export default async function handler(req, res) {
 
     if (!perfilSitec) {
       return res.status(404).json({
-        error: "No se pudo encontrar el perfil del estudiante en SITEc.",
+        error: "No se pudo encontrar el perfil del estudiante en SIITEC.",
       });
     }
 

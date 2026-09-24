@@ -197,7 +197,7 @@ export default function MisEventos() {
             </h1>
 
             <p className="mt-2 text-slate-500">
-              Inicia sesión con SITEc para
+              Inicia sesión con SIITEC para
               consultar tus eventos y códigos QR.
             </p>
 
@@ -208,7 +208,7 @@ export default function MisEventos() {
               }
               className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
             >
-              Iniciar sesión con SITEc
+              Iniciar sesión con SIITEC
             </button>
 
             <Link

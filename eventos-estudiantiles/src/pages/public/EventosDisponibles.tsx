@@ -366,7 +366,7 @@ export default function EventosDisponibles() {
 
           <p className="mx-auto mt-5 max-w-3xl text-base text-slate-600">
             Selecciona un evento, inicia sesión con
-            SITEc y obtén tu código QR de acceso.
+            SIITEC y obtén tu código QR de acceso.
           </p>
 
         </div>

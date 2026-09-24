@@ -18,7 +18,7 @@ export default function handler(req, res) {
   if (!authorizationEndpoint || !clientId) {
     res.status(500).json({
       error:
-        "Faltan variables de configuración de SITEc.",
+        "Faltan variables de configuración de SIITEC.",
     });
 
     return;

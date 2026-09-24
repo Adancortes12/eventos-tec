@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       !SIITEC_USUARIOS_ENDPOINT
     ) {
       return res.status(500).json({
-        error: "Faltan variables de configuración de SITEc.",
+        error: "Faltan variables de configuración de SIITEC.",
       });
     }
 
@@ -70,14 +70,14 @@ export default async function handler(req, res) {
 
     if (errorOAuth) {
       return res.status(400).json({
-        error: "SITEc rechazó la autenticación.",
+        error: "SIITEC rechazó la autenticación.",
         detalle: errorOAuth,
       });
     }
 
     if (!code) {
       return res.status(400).json({
-        error: "SITEc no devolvió el código de autorización.",
+        error: "SIITEC no devolvió el código de autorización.",
       });
     }
 
@@ -134,7 +134,7 @@ const redirectUri =
   !datosTokenUsuario.access_token
 ) {
   console.error(
-    "Error token usuario SITEc:",
+    "Error token usuario SIITEC:",
     {
       status: respuestaTokenUsuario.status,
       respuesta: datosTokenUsuario,
@@ -168,7 +168,7 @@ const redirectUri =
     const userinfo = await obtenerJsonSeguro(respuestaUserinfo);
 
     if (!respuestaUserinfo.ok) {
-      console.error("Error userinfo SITEc:", userinfo);
+      console.error("Error userinfo SIITEC:", userinfo);
 
       return res.status(401).json({
         error: "No se pudo obtener la información del usuario.",
@@ -177,7 +177,7 @@ const redirectUri =
 
     if (!userinfo.sub || !userinfo.preferred_username) {
       return res.status(400).json({
-        error: "SITEc no devolvió los datos necesarios del usuario.",
+        error: "SIITEC no devolvió los datos necesarios del usuario.",
       });
     }
 
@@ -209,10 +209,10 @@ const redirectUri =
     );
 
     if (!respuestaTokenAplicacion.ok || !datosTokenAplicacion.access_token) {
-      console.error("Error token aplicación SITEc:", datosTokenAplicacion);
+      console.error("Error token aplicación SIITEC:", datosTokenAplicacion);
 
       return res.status(401).json({
-        error: "No se pudo autorizar la aplicación con SITEc.",
+        error: "No se pudo autorizar la aplicación con SIITEC.",
       });
     }
     /*
@@ -232,7 +232,7 @@ const redirectUri =
       const datos = await obtenerJsonSeguro(respuesta);
 
       if (!respuesta.ok) {
-        console.error("Error consultando SITEc:", datos);
+        console.error("Error consultando SIITEC:", datos);
 
         return [];
       }
@@ -307,7 +307,7 @@ const redirectUri =
     if (!perfil) {
       return res.status(404).json({
         error:
-          "El usuario inició sesión, pero no se encontró su perfil activo en SITEc.",
+          "El usuario inició sesión, pero no se encontró su perfil activo en SIITEC.",
       });
     }
 
