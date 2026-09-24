@@ -152,7 +152,7 @@ export default function ModalEventoCreado({
           </div>
 
           {mensaje && (
-            <div className="rounded-lg bg-blue-50 p-3 text-center text-sm text-blue-700">
+            <div className="rounded-lg bg-blue-50 p-3 text-center text-sm text-[#1B396A]">
               {mensaje}
             </div>
           )}
@@ -187,7 +187,7 @@ export default function ModalEventoCreado({
             <button
               type="button"
               onClick={verEvento}
-              className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white"
+              className="rounded-lg bg-[#1B396A] px-5 py-3 font-semibold text-white"
             >
               Ver evento
             </button>

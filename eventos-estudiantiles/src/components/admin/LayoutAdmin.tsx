@@ -144,7 +144,7 @@ export default function LayoutAdmin() {
   const enlaceClase = ({ isActive }: { isActive: boolean }) =>
     `flex items-center rounded-xl px-4 py-3 text-sm font-medium transition ${
       isActive
-        ? "bg-blue-600 text-white shadow-sm"
+        ? "bg-[#1B396A] text-white shadow-sm"
         : "text-slate-300 hover:bg-slate-800 hover:text-white"
     }`;
 
@@ -227,7 +227,7 @@ export default function LayoutAdmin() {
            */}
           <div className="border-b border-slate-800 p-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-lg font-bold text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1B396A] text-lg font-bold text-white">
                 EA
               </div>
 
@@ -249,7 +249,7 @@ export default function LayoutAdmin() {
               <button
                 type="button"
                 onClick={abrirModalNuevoEvento}
-                className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                className="w-full rounded-xl bg-[#1B396A] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
               >
                 + Nuevo evento
               </button>
@@ -349,7 +349,7 @@ export default function LayoutAdmin() {
             <button
               type="button"
               onClick={abrirModalNuevoEvento}
-              className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+              className="rounded-xl bg-[#1B396A] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
             >
               + Nuevo evento
             </button>

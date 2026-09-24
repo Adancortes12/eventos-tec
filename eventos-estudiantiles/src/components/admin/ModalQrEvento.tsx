@@ -91,7 +91,7 @@ export default function ModalQrEvento({
               {nombreEvento}
             </p>
 
-            <p className="mt-1 text-xs font-medium text-blue-600">
+            <p className="mt-1 text-xs font-medium text-[#1B396A]">
               {codigoEvento}
             </p>
           </div>
@@ -160,7 +160,7 @@ export default function ModalQrEvento({
           </div>
 
           {mensaje && (
-            <div className="rounded-lg bg-blue-50 p-3 text-center text-sm text-blue-700">
+            <div className="rounded-lg bg-blue-50 p-3 text-center text-sm text-[#1B396A]">
               {mensaje}
             </div>
           )}
@@ -186,7 +186,7 @@ export default function ModalQrEvento({
           <button
             type="button"
             onClick={cerrar}
-            className="w-full rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white"
+            className="w-full rounded-lg bg-[#1B396A] px-5 py-3 font-semibold text-white"
           >
             Cerrar
           </button>

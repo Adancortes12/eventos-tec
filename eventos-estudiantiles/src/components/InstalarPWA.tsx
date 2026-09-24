@@ -155,7 +155,7 @@ export default function InstalarPWA() {
           py-2.5
           text-sm
           font-semibold
-          text-blue-700
+          text-[#1B396A]
           transition
           hover:border-blue-300
           hover:bg-blue-100

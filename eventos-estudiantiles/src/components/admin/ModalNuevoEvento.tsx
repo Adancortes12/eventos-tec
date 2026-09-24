@@ -275,11 +275,11 @@ export default function ModalNuevoEvento({ abierto, cerrar, alCrear }: Props) {
            * CÓDIGO AUTOMÁTICO
            */}
           <div className="rounded-lg bg-blue-50 p-4">
-            <p className="text-sm font-medium text-blue-700">
+            <p className="text-sm font-medium text-[#1B396A]">
               Código automático
             </p>
 
-            <p className="mt-1 text-sm text-blue-600">
+            <p className="mt-1 text-sm text-[#1B396A]">
               El sistema generará automáticamente el código del evento.
             </p>
 
@@ -467,7 +467,7 @@ export default function ModalNuevoEvento({ abierto, cerrar, alCrear }: Props) {
             <button
               type="submit"
               disabled={creando}
-              className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-[#1B396A] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {creando ? "Creando..." : "Crear evento"}
             </button>

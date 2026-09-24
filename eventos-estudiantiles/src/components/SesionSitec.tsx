@@ -61,14 +61,14 @@ export default function SesionSitec() {
         }
         className="
           rounded-xl
-          bg-blue-600
+          bg-[#1B396A]
           px-5
           py-2.5
           text-sm
           font-semibold
           text-white
           transition
-          hover:bg-blue-700
+          hover:opacity-90
           active:scale-[0.98]
         "
       >

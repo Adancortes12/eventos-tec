@@ -415,7 +415,7 @@ export default function ModalEditarEvento({
               disabled={
                 guardando
               }
-              className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-[#1B396A] px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {guardando
                 ? "Guardando..."
