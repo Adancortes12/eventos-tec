@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import {
   cerrarSesionSitec,
@@ -7,12 +10,21 @@ import {
   type UsuarioSesion,
 } from "../lib/sesion";
 
-export default function SesionSitec() {
-  const [usuario, setUsuario] =
-    useState<UsuarioSesion | null>(null);
+import InstalarPWA from "./InstalarPWA";
 
-  const [cargando, setCargando] =
-    useState(true);
+export default function SesionSitec() {
+  const [
+    usuario,
+    setUsuario,
+  ] =
+    useState<UsuarioSesion | null>(
+      null
+    );
+
+  const [
+    cargando,
+    setCargando,
+  ] = useState(true);
 
   useEffect(() => {
     async function cargarSesion() {
@@ -26,9 +38,12 @@ export default function SesionSitec() {
     cargarSesion();
   }, []);
 
+  /*
+   * CARGANDO SESIÓN
+   */
   if (cargando) {
     return (
-      <div className="text-sm text-white/70">
+      <div className="text-sm text-slate-500">
         Verificando sesión...
       </div>
     );
@@ -41,16 +56,20 @@ export default function SesionSitec() {
     return (
       <button
         type="button"
-        onClick={iniciarSesionSitec}
+        onClick={
+          iniciarSesionSitec
+        }
         className="
           rounded-xl
-          bg-white
+          bg-blue-600
           px-5
           py-2.5
+          text-sm
           font-semibold
-          text-[#1B396A]
+          text-white
           transition
-          hover:bg-white/90
+          hover:bg-blue-700
+          active:scale-[0.98]
         "
       >
         Iniciar sesión con SITEc
@@ -61,33 +80,61 @@ export default function SesionSitec() {
   /*
    * ESTUDIANTE
    */
-  if (usuario.tipo === "estudiante") {
+  if (
+    usuario.tipo ===
+    "estudiante"
+  ) {
     return (
-      <div className="flex items-center gap-4">
-        <div className="text-right">
-          <p className="font-semibold text-white">
+      <div
+        className="
+          flex
+          flex-wrap
+          items-center
+          justify-end
+          gap-3
+        "
+      >
+        {/*
+         * BOTÓN PARA INSTALAR PWA
+         */}
+        <InstalarPWA />
+
+        {/*
+         * DATOS DEL ESTUDIANTE
+         */}
+        <div className="hidden text-right sm:block">
+          <p className="text-sm font-semibold text-slate-800">
             Estudiante
           </p>
 
-          <p className="text-sm text-white/70">
-            {usuario.numeroEstudiante}
+          <p className="text-xs text-slate-500">
+            {
+              usuario.numeroEstudiante
+            }
           </p>
         </div>
 
+        {/*
+         * CERRAR SESIÓN
+         */}
         <button
           type="button"
-          onClick={cerrarSesionSitec}
+          onClick={
+            cerrarSesionSitec
+          }
           className="
             rounded-xl
             border
-            border-white/60
+            border-slate-300
+            bg-white
             px-4
-            py-2
+            py-2.5
             text-sm
             font-medium
-            text-white
+            text-slate-700
             transition
-            hover:bg-white/10
+            hover:bg-slate-100
+            active:scale-[0.98]
           "
         >
           Cerrar sesión
@@ -97,41 +144,58 @@ export default function SesionSitec() {
   }
 
   /*
-   * MAESTRO
+   * MAESTRO / ADMIN /
+   * SUPERADMIN
    */
   const nombreRol =
-    usuario.rol === "superadmin"
+    usuario.rol ===
+    "superadmin"
       ? "Superadministrador"
-      : usuario.rol === "admin"
+      : usuario.rol ===
+          "admin"
         ? "Administrador"
         : "Maestro";
 
   return (
-    <div className="flex items-center gap-4">
-      <div className="text-right">
-        <p className="font-semibold text-white">
+    <div
+      className="
+        flex
+        flex-wrap
+        items-center
+        justify-end
+        gap-3
+      "
+    >
+      <div className="hidden text-right sm:block">
+        <p className="text-sm font-semibold text-slate-800">
           {nombreRol}
         </p>
 
-        <p className="text-sm text-white/70">
-          {usuario.usuarioSitec}
+        <p className="text-xs text-slate-500">
+          {
+            usuario.usuarioSitec
+          }
         </p>
       </div>
 
       <button
         type="button"
-        onClick={cerrarSesionSitec}
+        onClick={
+          cerrarSesionSitec
+        }
         className="
           rounded-xl
           border
-          border-white/60
+          border-slate-300
+          bg-white
           px-4
-          py-2
+          py-2.5
           text-sm
           font-medium
-          text-white
+          text-slate-700
           transition
-          hover:bg-white/10
+          hover:bg-slate-100
+          active:scale-[0.98]
         "
       >
         Cerrar sesión
