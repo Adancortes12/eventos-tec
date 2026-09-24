@@ -306,7 +306,7 @@ export default function EventosDisponibles() {
       {/*
        * NAVBAR
        */}
-      <header className="border-b border-slate-200 bg-white">
+      <header className="border-b border-[#1B396A] bg-[#1B396A]">
 
         <div className="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
 
@@ -315,30 +315,30 @@ export default function EventosDisponibles() {
             className="flex items-center gap-3"
           >
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1B396A] text-sm font-bold text-white">
-              EA
-            </div>
+  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#1B396A]">
+  EA
+</div>
 
             <div className="hidden sm:block">
-              <p className="font-bold text-slate-900">
-                Eventos Estudiantiles
-              </p>
+<p className="font-bold text-white">
+  Eventos Estudiantiles
+</p>
 
-              <p className="text-xs text-slate-500">
-                Encuentra y registra tus eventos
-              </p>
+<p className="text-xs text-white/70">
+  Encuentra y registra tus eventos
+</p>
             </div>
 
           </Link>
 
           <div className="flex items-center gap-4">
 
-            <Link
-              to="/mis-eventos"
-              className="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
-            >
-              Mis eventos
-            </Link>
+<Link
+  to="/mis-eventos"
+  className="rounded-xl border border-white/60 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+>
+  Mis eventos
+</Link>
 
             <SesionSitec />
 

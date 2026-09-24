@@ -28,7 +28,7 @@ export default function SesionSitec() {
 
   if (cargando) {
     return (
-      <div className="text-sm text-slate-500">
+      <div className="text-sm text-white/70">
         Verificando sesión...
       </div>
     );
@@ -44,13 +44,13 @@ export default function SesionSitec() {
         onClick={iniciarSesionSitec}
         className="
           rounded-xl
-          bg-blue-600
+          bg-white
           px-5
           py-2.5
           font-semibold
-          text-white
+          text-[#1B396A]
           transition
-          hover:bg-blue-700
+          hover:bg-white/90
         "
       >
         Iniciar sesión con SITEc
@@ -65,11 +65,11 @@ export default function SesionSitec() {
     return (
       <div className="flex items-center gap-4">
         <div className="text-right">
-          <p className="font-semibold text-slate-800">
+          <p className="font-semibold text-white">
             Estudiante
           </p>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-white/70">
             {usuario.numeroEstudiante}
           </p>
         </div>
@@ -80,14 +80,14 @@ export default function SesionSitec() {
           className="
             rounded-xl
             border
-            border-slate-300
+            border-white/60
             px-4
             py-2
             text-sm
             font-medium
-            text-slate-700
+            text-white
             transition
-            hover:bg-slate-100
+            hover:bg-white/10
           "
         >
           Cerrar sesión
@@ -109,11 +109,11 @@ export default function SesionSitec() {
   return (
     <div className="flex items-center gap-4">
       <div className="text-right">
-        <p className="font-semibold text-slate-800">
+        <p className="font-semibold text-white">
           {nombreRol}
         </p>
 
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-white/70">
           {usuario.usuarioSitec}
         </p>
       </div>
@@ -124,14 +124,14 @@ export default function SesionSitec() {
         className="
           rounded-xl
           border
-          border-slate-300
+          border-white/60
           px-4
           py-2
           text-sm
           font-medium
-          text-slate-700
+          text-white
           transition
-          hover:bg-slate-100
+          hover:bg-white/10
         "
       >
         Cerrar sesión
