@@ -353,25 +353,25 @@ export default function EventosDisponibles() {
        */}
       <section className="border-b border-slate-200 bg-white">
 
-        <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 sm:py-16">
+  <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 sm:py-16">
 
-          <p className="font-semibold text-[#1B396A]">
-            Eventos disponibles
-          </p>
+    <p className="font-semibold text-[#1B396A]">
+      Eventos disponibles
+    </p>
 
-          <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Encuentra los próximos eventos y
-            regístrate fácilmente
-          </h1>
+    <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-bold tracking-tight text-[#1F2937] sm:text-4xl">
+      Encuentra los próximos eventos y
+      regístrate fácilmente
+    </h1>
 
-          <p className="mx-auto mt-5 max-w-3xl text-base text-slate-600">
-            Selecciona un evento, inicia sesión con
-            SIITEC y obtén tu código QR de acceso.
-          </p>
+    <p className="mx-auto mt-5 max-w-3xl text-base text-[#4B5563]">
+      Selecciona un evento, inicia sesión con
+      SIITEC y obtén tu código QR de acceso.
+    </p>
 
-        </div>
+  </div>
 
-      </section>
+</section>
 
       {/*
        * CONTENIDO
@@ -407,7 +407,7 @@ export default function EventosDisponibles() {
           eventos.length === 0 && (
           <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
 
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-[#1F2937]">
               No hay eventos disponibles
             </h2>
 
@@ -476,12 +476,12 @@ export default function EventosDisponibles() {
                        */}
                       <div className="mt-5 text-center">
 
-                        <h2 className="text-xl font-bold text-slate-900">
+                        <h2 className="text-xl font-bold text-[#1F2937]">
                           {evento.nombre}
                         </h2>
 
                         {evento.descripcion && (
-                          <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
+                          <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#4B5563]">
                             {
                               evento.descripcion
                             }
