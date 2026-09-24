@@ -1,39 +1,120 @@
-import { useEffect, useState } from "react";
-import { Navigate } from "react-router";
-import { supabase } from "../lib/supabase";
+import {
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+
+import {
+  Navigate,
+} from "react-router";
+
+import {
+  obtenerSesion,
+  type UsuarioSesion,
+} from "../lib/sesion";
 
 type Props = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-export default function RutaProtegida({ children }: Props) {
-  const [cargando, setCargando] = useState(true);
-  const [autenticado, setAutenticado] = useState(false);
+export default function RutaProtegida({
+  children,
+}: Props) {
+  const [
+    cargando,
+    setCargando,
+  ] = useState(true);
+
+  const [
+    usuario,
+    setUsuario,
+  ] =
+    useState<UsuarioSesion | null>(
+      null
+    );
 
   useEffect(() => {
-    const verificarSesion = async () => {
-      const { data } = await supabase.auth.getSession();
+    async function verificarSesion() {
+      const sesion =
+        await obtenerSesion();
 
-      setAutenticado(!!data.session);
+      setUsuario(sesion);
       setCargando(false);
-    };
+    }
 
     verificarSesion();
   }, []);
 
+  /*
+   * VERIFICANDO SESIÓN
+   */
   if (cargando) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600">
+      <main className="flex min-h-screen items-center justify-center bg-slate-100">
+        <p className="text-sm text-slate-500">
           Verificando sesión...
         </p>
       </main>
     );
   }
 
-  if (!autenticado) {
-    return <Navigate to="/admin/login" replace />;
+  /*
+   * SIN SESIÓN
+   *
+   * Por ahora regresamos al inicio,
+   * donde puede iniciar sesión con SITEc.
+   */
+  if (!usuario) {
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
   }
 
-  return children;
+  /*
+   * ESTUDIANTE
+   *
+   * Un estudiante nunca debe entrar
+   * al panel administrativo.
+   */
+  if (
+    usuario.tipo ===
+    "estudiante"
+  ) {
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
+  }
+
+  /*
+   * MAESTRO
+   * ADMIN
+   * SUPERADMIN
+   *
+   * Todos son tipo "maestro".
+   * Los permisos específicos los
+   * controlaremos después según:
+   *
+   * maestro
+   * admin
+   * superadmin
+   */
+  if (
+    usuario.tipo ===
+    "maestro"
+  ) {
+    return children;
+  }
+
+  return (
+    <Navigate
+      to="/"
+      replace
+    />
+  );
 }

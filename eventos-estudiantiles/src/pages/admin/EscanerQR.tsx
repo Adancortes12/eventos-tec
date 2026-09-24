@@ -1,221 +1,365 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router";
-import { Html5Qrcode } from "html5-qrcode";
-import { supabase } from "../../lib/supabase";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  Link,
+  useParams,
+} from "react-router";
+
+import {
+  Html5Qrcode,
+} from "html5-qrcode";
 
 type ResultadoEscaneo = {
-  tipo: "exito" | "repetido" | "invalido" | "otro_evento" | "error";
+  tipo:
+    | "exito"
+    | "repetido"
+    | "invalido"
+    | "otro_evento"
+    | "error";
+
   titulo: string;
   nombre?: string;
   numero?: string;
   hora?: string;
 };
 
+type RespuestaAsistencia = {
+  tipo?: string;
+  error?: string;
+  nombre?: string;
+  numero?: string;
+  asistioEn?: string | null;
+};
+
 export default function EscanerQR() {
   const { id } = useParams();
 
-  const [resultado, setResultado] =
-    useState<ResultadoEscaneo | null>(null);
+  const [
+    resultado,
+    setResultado,
+  ] =
+    useState<ResultadoEscaneo | null>(
+      null
+    );
 
-  const [iniciandoCamara, setIniciandoCamara] =
-    useState(true);
+  const [
+    iniciandoCamara,
+    setIniciandoCamara,
+  ] = useState(true);
 
-  const [errorCamara, setErrorCamara] =
-    useState("");
+  const [
+    errorCamara,
+    setErrorCamara,
+  ] = useState("");
 
-  const procesandoRef = useRef(false);
-  const lectorRef = useRef<Html5Qrcode | null>(null);
+  const procesandoRef =
+    useRef(false);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
-    const lector = new Html5Qrcode("lector-qr");
-
-    lectorRef.current = lector;
-
-    const iniciarCamara = async () => {
-      try {
-        setIniciandoCamara(true);
-        setErrorCamara("");
-
-        await lector.start(
-          {
-            facingMode: "environment",
-          },
-          {
-            fps: 10,
-            qrbox: {
-              width: 250,
-              height: 250,
-            },
-          },
-          async (textoDecodificado) => {
-            await procesarQr(textoDecodificado.trim());
-          },
-          () => {
-            // Ignoramos los intentos fallidos de lectura.
-          }
-        );
-
-        setIniciandoCamara(false);
-      } catch (error) {
-        console.error(error);
-
-        setErrorCamara(
-          "No se pudo abrir la cámara. Verifica los permisos del navegador."
-        );
-
-        setIniciandoCamara(false);
-      }
-    };
-
-    const procesarQr = async (tokenQr: string) => {
-      if (procesandoRef.current || !id) {
-        return;
-      }
-
-      procesandoRef.current = true;
-
-      const { data: inscripcion, error } = await supabase
-        .from("inscripciones")
-        .select(`
-          id,
-          evento_id,
-          numero_estudiante,
-          nombre_completo,
-          asistio,
-          asistio_en
-        `)
-        .eq("token_qr", tokenQr)
-        .maybeSingle();
-
-      if (error) {
-        console.error(error);
-
-        setResultado({
-          tipo: "error",
-          titulo: "ERROR AL CONSULTAR EL QR",
-        });
-
-        liberarEscaner();
-        return;
-      }
-
-      if (!inscripcion) {
-        setResultado({
-          tipo: "invalido",
-          titulo: "QR NO VÁLIDO",
-        });
-
-        liberarEscaner();
-        return;
-      }
-
-      if (inscripcion.evento_id !== id) {
-        setResultado({
-          tipo: "otro_evento",
-          titulo: "ESTE QR NO PERTENECE A ESTE EVENTO",
-        });
-
-        liberarEscaner();
-        return;
-      }
-
-      if (inscripcion.asistio) {
-        setResultado({
-          tipo: "repetido",
-          titulo: "ASISTENCIA YA REGISTRADA",
-          nombre: inscripcion.nombre_completo,
-          numero: inscripcion.numero_estudiante,
-          hora: inscripcion.asistio_en
-            ? new Date(
-                inscripcion.asistio_en
-              ).toLocaleString("es-MX")
-            : undefined,
-        });
-
-        liberarEscaner();
-        return;
-      }
-
-      const ahora = new Date().toISOString();
-
-      const { error: errorActualizar } = await supabase
-        .from("inscripciones")
-        .update({
-          asistio: true,
-          asistio_en: ahora,
-        })
-        .eq("id", inscripcion.id);
-
-      if (errorActualizar) {
-        console.error(errorActualizar);
-
-        setResultado({
-          tipo: "error",
-          titulo: "NO SE PUDO REGISTRAR LA ASISTENCIA",
-        });
-
-        liberarEscaner();
-        return;
-      }
-
-      setResultado({
-        tipo: "exito",
-        titulo: "ASISTENCIA REGISTRADA",
-        nombre: inscripcion.nombre_completo,
-        numero: inscripcion.numero_estudiante,
-        hora: new Date(ahora).toLocaleString("es-MX"),
-      });
-
-      liberarEscaner();
-    };
+    const lector =
+      new Html5Qrcode(
+        "lector-qr"
+      );
 
     const liberarEscaner = () => {
       setTimeout(() => {
-        procesandoRef.current = false;
+        procesandoRef.current =
+          false;
+
         setResultado(null);
       }, 2500);
     };
 
+    const procesarQr = async (
+      tokenQr: string
+    ) => {
+      if (
+        procesandoRef.current ||
+        !id
+      ) {
+        return;
+      }
+
+      procesandoRef.current =
+        true;
+
+      try {
+        const respuesta =
+          await fetch(
+            "/api/asistencia/registrar",
+            {
+              method: "POST",
+              credentials:
+                "include",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body: JSON.stringify({
+                eventoId: id,
+                tokenQr,
+              }),
+            }
+          );
+
+        const datos: RespuestaAsistencia =
+          await respuesta.json();
+
+        /*
+         * QR INVÁLIDO
+         */
+        if (
+          datos.tipo ===
+          "invalido"
+        ) {
+          setResultado({
+            tipo: "invalido",
+            titulo:
+              "QR NO VÁLIDO",
+          });
+
+          liberarEscaner();
+          return;
+        }
+
+        /*
+         * QR DE OTRO EVENTO
+         */
+        if (
+          datos.tipo ===
+          "otro_evento"
+        ) {
+          setResultado({
+            tipo:
+              "otro_evento",
+
+            titulo:
+              "ESTE QR NO PERTENECE A ESTE EVENTO",
+          });
+
+          liberarEscaner();
+          return;
+        }
+
+        /*
+         * YA TENÍA ASISTENCIA
+         */
+        if (
+          datos.tipo ===
+          "repetido"
+        ) {
+          setResultado({
+            tipo: "repetido",
+
+            titulo:
+              "ASISTENCIA YA REGISTRADA",
+
+            nombre:
+              datos.nombre,
+
+            numero:
+              datos.numero,
+
+            hora:
+              datos.asistioEn
+                ? new Date(
+                    datos.asistioEn
+                  ).toLocaleString(
+                    "es-MX"
+                  )
+                : undefined,
+          });
+
+          liberarEscaner();
+          return;
+        }
+
+        /*
+         * RESPUESTA DE ERROR
+         */
+        if (!respuesta.ok) {
+          setResultado({
+            tipo: "error",
+
+            titulo:
+              datos.error ??
+              "NO SE PUDO REGISTRAR LA ASISTENCIA",
+          });
+
+          liberarEscaner();
+          return;
+        }
+
+        /*
+         * ASISTENCIA REGISTRADA
+         */
+        if (
+          datos.tipo ===
+          "exito"
+        ) {
+          setResultado({
+            tipo: "exito",
+
+            titulo:
+              "ASISTENCIA REGISTRADA",
+
+            nombre:
+              datos.nombre,
+
+            numero:
+              datos.numero,
+
+            hora:
+              datos.asistioEn
+                ? new Date(
+                    datos.asistioEn
+                  ).toLocaleString(
+                    "es-MX"
+                  )
+                : undefined,
+          });
+
+          liberarEscaner();
+          return;
+        }
+
+        /*
+         * RESPUESTA INESPERADA
+         */
+        setResultado({
+          tipo: "error",
+
+          titulo:
+            "RESPUESTA NO VÁLIDA DEL SERVIDOR",
+        });
+
+        liberarEscaner();
+      } catch (error) {
+        console.error(error);
+
+        setResultado({
+          tipo: "error",
+
+          titulo:
+            "NO SE PUDO CONECTAR CON EL SERVIDOR",
+        });
+
+        liberarEscaner();
+      }
+    };
+
+    const iniciarCamara =
+      async () => {
+        try {
+          setIniciandoCamara(
+            true
+          );
+
+          setErrorCamara("");
+
+          await lector.start(
+            {
+              facingMode:
+                "environment",
+            },
+
+            {
+              fps: 10,
+
+              qrbox: {
+                width: 250,
+                height: 250,
+              },
+            },
+
+            async (
+              textoDecodificado
+            ) => {
+              await procesarQr(
+                textoDecodificado.trim()
+              );
+            },
+
+            () => {
+              // Ignoramos lecturas
+              // que todavía no detecten QR.
+            }
+          );
+
+          setIniciandoCamara(
+            false
+          );
+        } catch (error) {
+          console.error(error);
+
+          setErrorCamara(
+            "No se pudo abrir la cámara. Verifica los permisos del navegador."
+          );
+
+          setIniciandoCamara(
+            false
+          );
+        }
+      };
+
     iniciarCamara();
 
     return () => {
-      const detener = async () => {
-        try {
-          if (lector.isScanning) {
-            await lector.stop();
-          }
+      const detener =
+        async () => {
+          try {
+            if (
+              lector.isScanning
+            ) {
+              await lector.stop();
+            }
 
-          lector.clear();
-        } catch (error) {
-          console.error(error);
-        }
-      };
+            lector.clear();
+          } catch (error) {
+            console.error(
+              error
+            );
+          }
+        };
 
       detener();
     };
   }, [id]);
 
-  const obtenerEstilosResultado = () => {
-    if (!resultado) return "";
-
-    switch (resultado.tipo) {
-      case "exito":
-        return "border-green-200 bg-green-50 text-green-800";
-
-      case "repetido":
-        return "border-yellow-200 bg-yellow-50 text-yellow-800";
-
-      case "invalido":
-      case "otro_evento":
-      case "error":
-        return "border-red-200 bg-red-50 text-red-800";
-
-      default:
+  const obtenerEstilosResultado =
+    () => {
+      if (!resultado) {
         return "";
-    }
-  };
+      }
+
+      switch (
+        resultado.tipo
+      ) {
+        case "exito":
+          return "border-green-200 bg-green-50 text-green-800";
+
+        case "repetido":
+          return "border-yellow-200 bg-yellow-50 text-yellow-800";
+
+        case "invalido":
+        case "otro_evento":
+        case "error":
+          return "border-red-200 bg-red-50 text-red-800";
+
+        default:
+          return "";
+      }
+    };
 
   return (
     <div>
@@ -232,7 +376,9 @@ export default function EscanerQR() {
         </h1>
 
         <p className="mt-2 text-gray-600">
-          Coloca el código QR del estudiante frente a la cámara.
+          Coloca el código QR
+          del estudiante frente
+          a la cámara.
         </p>
       </div>
 
@@ -276,7 +422,8 @@ export default function EscanerQR() {
 
             {resultado.hora && (
               <p className="mt-3 text-sm">
-                Hora: {resultado.hora}
+                Hora:{" "}
+                {resultado.hora}
               </p>
             )}
           </div>

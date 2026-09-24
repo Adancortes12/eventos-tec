@@ -19,6 +19,13 @@ type Evento = {
 
 type ContextoAdmin = {
   abrirModalNuevoEvento: () => void;
+
+  rol:
+    | "maestro"
+    | "admin"
+    | "superadmin";
+
+  puedeCrearEventos: boolean;
 };
 
 type FiltroEstado =
@@ -27,8 +34,11 @@ type FiltroEstado =
   | "finalizado";
 
 export default function Eventos() {
-  const { abrirModalNuevoEvento } =
-    useOutletContext<ContextoAdmin>();
+    
+  const {
+  abrirModalNuevoEvento,
+  puedeCrearEventos,
+  } = useOutletContext<ContextoAdmin>();
 
   const [eventos, setEventos] =
     useState<Evento[]>([]);
@@ -138,19 +148,23 @@ export default function Eventos() {
           </h1>
 
           <p className="mt-2 text-slate-500">
-            Consulta y administra los eventos registrados.
-          </p>
+  {puedeCrearEventos
+    ? "Consulta y administra los eventos registrados."
+    : "Consulta los eventos y registra asistencias."}
+</p>
         </div>
 
-        <button
-          type="button"
-          onClick={
-            abrirModalNuevoEvento
-          }
-          className="w-fit rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-        >
-          + Nuevo evento
-        </button>
+        {puedeCrearEventos && (
+  <button
+    type="button"
+    onClick={
+      abrirModalNuevoEvento
+    }
+    className="w-fit rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+  >
+    + Nuevo evento
+  </button>
+)}
       </div>
 
       {/* Resumen */}

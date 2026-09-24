@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 
 import ModalEditarEvento from "../../components/admin/ModalEditarEvento";
 import ModalQrEvento from "../../components/admin/ModalQrEvento";
@@ -13,6 +13,15 @@ type Evento = {
   fecha_evento: string;
   hora_evento: string;
   estado: string;
+  fecha_activacion: string;
+  duracion_minutos: number;
+  cierre_inscripcion: string | null;
+};
+
+type ContextoAdmin = {
+  puedeCrearEventos: boolean;
+
+  rol: "maestro" | "admin" | "superadmin";
 };
 
 type Inscripcion = {
@@ -29,45 +38,44 @@ type DatosDetalle = {
   inscripciones: Inscripcion[];
 };
 
-async function obtenerDatosEvento(
-  id: string
-): Promise<DatosDetalle> {
-  const { data: eventoData, error: eventoError } =
-    await supabase
-      .from("eventos")
-      .select(`
-        id,
-        codigo_evento,
-        nombre,
-        descripcion,
-        fecha_evento,
-        hora_evento,
-        estado
-      `)
-      .eq("id", id)
-      .single();
+async function obtenerDatosEvento(id: string): Promise<DatosDetalle> {
+  const { data: eventoData, error: eventoError } = await supabase
+    .from("eventos")
+    .select(
+      `
+  id,
+  codigo_evento,
+  nombre,
+  descripcion,
+  fecha_evento,
+  hora_evento,
+  estado,
+  fecha_activacion,
+  duracion_minutos,
+  cierre_inscripcion
+`,
+    )
+    .eq("id", id)
+    .single();
 
   if (eventoError || !eventoData) {
     console.error(eventoError);
 
-    throw new Error(
-      "No se pudo cargar el evento."
-    );
+    throw new Error("No se pudo cargar el evento.");
   }
 
-  const {
-    data: inscripcionesData,
-    error: inscripcionesError,
-  } = await supabase
+  const { data: inscripcionesData, error: inscripcionesError } = await supabase
     .from("inscripciones")
-    .select(`
+    .select(
+      `
       id,
       numero_estudiante,
       nombre_completo,
       registrado_en,
       asistio,
       asistio_en
-    `)
+    `,
+    )
     .eq("evento_id", id)
     .order("registrado_en", {
       ascending: false,
@@ -76,9 +84,7 @@ async function obtenerDatosEvento(
   if (inscripcionesError) {
     console.error(inscripcionesError);
 
-    throw new Error(
-      "No se pudieron cargar las inscripciones."
-    );
+    throw new Error("No se pudieron cargar las inscripciones.");
   }
 
   return {
@@ -91,27 +97,19 @@ export default function DetalleEvento() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [evento, setEvento] =
-    useState<Evento | null>(null);
+  const { puedeCrearEventos } = useOutletContext<ContextoAdmin>();
 
-  const [inscripciones, setInscripciones] =
-    useState<Inscripcion[]>([]);
+  const [evento, setEvento] = useState<Evento | null>(null);
 
-  const [cargando, setCargando] =
-    useState(true);
+  const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
 
-  const [error, setError] =
-    useState("");
+  const [cargando, setCargando] = useState(true);
 
-  const [
-    modalEditarAbierto,
-    setModalEditarAbierto,
-  ] = useState(false);
+  const [error, setError] = useState("");
 
-  const [
-    modalQrAbierto,
-    setModalQrAbierto,
-  ] = useState(false);
+  const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+
+  const [modalQrAbierto, setModalQrAbierto] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -127,9 +125,7 @@ export default function DetalleEvento() {
         }
 
         setEvento(datos.evento);
-        setInscripciones(
-          datos.inscripciones
-        );
+        setInscripciones(datos.inscripciones);
         setError("");
       })
       .catch((errorConsulta: unknown) => {
@@ -137,16 +133,10 @@ export default function DetalleEvento() {
           return;
         }
 
-        if (
-          errorConsulta instanceof Error
-        ) {
-          setError(
-            errorConsulta.message
-          );
+        if (errorConsulta instanceof Error) {
+          setError(errorConsulta.message);
         } else {
-          setError(
-            "Ocurrió un error al cargar el evento."
-          );
+          setError("Ocurrió un error al cargar el evento.");
         }
       })
       .finally(() => {
@@ -166,20 +156,15 @@ export default function DetalleEvento() {
     }
 
     try {
-      const datos =
-        await obtenerDatosEvento(id);
+      const datos = await obtenerDatosEvento(id);
 
       setEvento(datos.evento);
-      setInscripciones(
-        datos.inscripciones
-      );
+      setInscripciones(datos.inscripciones);
       setError("");
     } catch (errorConsulta) {
       console.error(errorConsulta);
 
-      setError(
-        "No se pudo actualizar la información del evento."
-      );
+      setError("No se pudo actualizar la información del evento.");
     }
   };
 
@@ -189,76 +174,116 @@ export default function DetalleEvento() {
     await refrescarDatos();
   };
 
-  const finalizarEvento = async () => {
-    if (!evento) {
-      return;
-    }
+ const finalizarEvento = async () => {
+  if (!evento) {
+    return;
+  }
 
-    const confirmar = window.confirm(
-      "¿Seguro que quieres finalizar este evento?"
+  const confirmar = window.confirm(
+    "¿Seguro que quieres finalizar este evento?"
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(
+      "/api/eventos/finalizar",
+      {
+        method: "PATCH",
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          eventoId: evento.id,
+        }),
+      }
     );
 
-    if (!confirmar) {
-      return;
-    }
+    const datos =
+      await respuesta.json();
 
-    const { error } = await supabase
-      .from("eventos")
-      .update({
-        estado: "finalizado",
-      })
-      .eq("id", evento.id);
-
-    if (error) {
-      console.error(error);
-
+    if (!respuesta.ok) {
       window.alert(
-        "No se pudo finalizar el evento."
+        datos.error ??
+          "No se pudo finalizar el evento."
       );
 
       return;
     }
 
     await refrescarDatos();
-  };
+  } catch (error) {
+    console.error(error);
 
-  const eliminarEvento = async () => {
-    if (!evento) {
-      return;
-    }
+    window.alert(
+      "No se pudo conectar con el servidor."
+    );
+  }
+};
 
-    const confirmar = window.confirm(
-      "¿Seguro que quieres eliminar este evento? Esta acción no se puede deshacer."
+ const eliminarEvento = async () => {
+  if (!evento) {
+    return;
+  }
+
+  const confirmar = window.confirm(
+    "¿Seguro que quieres eliminar este evento? Esta acción no se puede deshacer."
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(
+      "/api/eventos/eliminar",
+      {
+        method: "DELETE",
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          eventoId: evento.id,
+        }),
+      }
     );
 
-    if (!confirmar) {
-      return;
-    }
+    const datos =
+      await respuesta.json();
 
-    const { error } = await supabase
-      .from("eventos")
-      .delete()
-      .eq("id", evento.id);
-
-    if (error) {
-      console.error(error);
-
+    if (!respuesta.ok) {
       window.alert(
-        "No se pudo eliminar el evento."
+        datos.error ??
+          "No se pudo eliminar el evento."
       );
 
       return;
     }
 
     navigate("/admin/eventos");
-  };
+  } catch (error) {
+    console.error(error);
+
+    window.alert(
+      "No se pudo conectar con el servidor."
+    );
+  }
+};
 
   if (!id) {
     return (
       <div className="rounded-xl bg-white p-6 shadow">
-        <p className="text-red-600">
-          Evento no válido.
-        </p>
+        <p className="text-red-600">Evento no válido.</p>
       </div>
     );
   }
@@ -266,9 +291,7 @@ export default function DetalleEvento() {
   if (cargando) {
     return (
       <div className="py-10">
-        <p className="text-gray-600">
-          Cargando evento...
-        </p>
+        <p className="text-gray-600">Cargando evento...</p>
       </div>
     );
   }
@@ -276,34 +299,22 @@ export default function DetalleEvento() {
   if (error || !evento) {
     return (
       <div className="rounded-xl bg-white p-6 shadow">
-        <p className="text-red-600">
-          {error ||
-            "Evento no encontrado."}
-        </p>
+        <p className="text-red-600">{error || "Evento no encontrado."}</p>
       </div>
     );
   }
 
-  const totalRegistrados =
-    inscripciones.length;
+  const totalRegistrados = inscripciones.length;
 
-  const totalAsistieron =
-    inscripciones.filter(
-      (inscripcion) =>
-        inscripcion.asistio
-    ).length;
+  const totalAsistieron = inscripciones.filter(
+    (inscripcion) => inscripcion.asistio,
+  ).length;
 
-  const totalPendientes =
-    totalRegistrados -
-    totalAsistieron;
+  const totalPendientes = totalRegistrados - totalAsistieron;
 
   const porcentajeAsistencia =
     totalRegistrados > 0
-      ? (
-          (totalAsistieron /
-            totalRegistrados) *
-          100
-        ).toFixed(1)
+      ? ((totalAsistieron / totalRegistrados) * 100).toFixed(1)
       : "0.0";
 
   return (
@@ -330,9 +341,7 @@ export default function DetalleEvento() {
                     : "bg-gray-200 text-gray-700"
                 }`}
               >
-                {evento.estado === "activo"
-                  ? "Activo"
-                  : "Finalizado"}
+                {evento.estado === "activo" ? "Activo" : "Finalizado"}
               </span>
             </div>
 
@@ -348,24 +357,19 @@ export default function DetalleEvento() {
 
             <div className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm text-gray-500">
               <p>
-                <span className="font-medium text-gray-700">
-                  Fecha:
-                </span>{" "}
+                <span className="font-medium text-gray-700">Fecha:</span>{" "}
                 {evento.fecha_evento}
               </p>
 
               <p>
-                <span className="font-medium text-gray-700">
-                  Hora:
-                </span>{" "}
+                <span className="font-medium text-gray-700">Hora:</span>{" "}
                 {evento.hora_evento}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2 lg:max-w-md lg:justify-end">
-            {evento.estado ===
-              "activo" && (
+            {evento.estado === "activo" && (
               <Link
                 to={`/admin/eventos/${evento.id}/escanear`}
                 className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700"
@@ -376,46 +380,36 @@ export default function DetalleEvento() {
 
             <button
               type="button"
-              onClick={() =>
-                setModalQrAbierto(true)
-              }
+              onClick={() => setModalQrAbierto(true)}
               className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
             >
               Ver enlace y QR
             </button>
 
-            <button
-              type="button"
-              onClick={() =>
-                setModalEditarAbierto(
-                  true
-                )
-              }
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-            >
-              Editar evento
-            </button>
-
-            {evento.estado ===
-              "activo" && (
+            {puedeCrearEventos && evento.estado === "activo" && (
               <button
                 type="button"
-                onClick={
-                  finalizarEvento
-                }
+                onClick={() => setModalEditarAbierto(true)}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                Editar evento
+              </button>
+            )}
+
+            {puedeCrearEventos && evento.estado === "activo" && (
+              <button
+                type="button"
+                onClick={finalizarEvento}
                 className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-900"
               >
                 Finalizar evento
               </button>
             )}
 
-            {inscripciones.length ===
-              0 && (
+            {puedeCrearEventos && inscripciones.length === 0 && (
               <button
                 type="button"
-                onClick={
-                  eliminarEvento
-                }
+                onClick={eliminarEvento}
                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
               >
                 Eliminar evento
@@ -427,9 +421,7 @@ export default function DetalleEvento() {
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-xl bg-white p-5 shadow">
-          <p className="text-sm font-medium text-gray-500">
-            Registrados
-          </p>
+          <p className="text-sm font-medium text-gray-500">Registrados</p>
 
           <p className="mt-2 text-3xl font-bold text-gray-900">
             {totalRegistrados}
@@ -437,9 +429,7 @@ export default function DetalleEvento() {
         </div>
 
         <div className="rounded-xl bg-white p-5 shadow">
-          <p className="text-sm font-medium text-gray-500">
-            Asistieron
-          </p>
+          <p className="text-sm font-medium text-gray-500">Asistieron</p>
 
           <p className="mt-2 text-3xl font-bold text-green-600">
             {totalAsistieron}
@@ -447,9 +437,7 @@ export default function DetalleEvento() {
         </div>
 
         <div className="rounded-xl bg-white p-5 shadow">
-          <p className="text-sm font-medium text-gray-500">
-            Pendientes
-          </p>
+          <p className="text-sm font-medium text-gray-500">Pendientes</p>
 
           <p className="mt-2 text-3xl font-bold text-yellow-600">
             {totalPendientes}
@@ -486,8 +474,7 @@ export default function DetalleEvento() {
           </div>
         </div>
 
-        {inscripciones.length ===
-        0 ? (
+        {inscripciones.length === 0 ? (
           <div className="p-8 text-center">
             <p className="font-medium text-gray-700">
               Aún no hay estudiantes registrados.
@@ -525,58 +512,43 @@ export default function DetalleEvento() {
               </thead>
 
               <tbody>
-                {inscripciones.map(
-                  (inscripcion) => (
-                    <tr
-                      key={
-                        inscripcion.id
-                      }
-                      className="border-t border-gray-100"
-                    >
-                      <td className="px-5 py-4 text-sm text-gray-700">
-                        {
-                          inscripcion.numero_estudiante
-                        }
-                      </td>
+                {inscripciones.map((inscripcion) => (
+                  <tr key={inscripcion.id} className="border-t border-gray-100">
+                    <td className="px-5 py-4 text-sm text-gray-700">
+                      {inscripcion.numero_estudiante}
+                    </td>
 
-                      <td className="px-5 py-4 text-sm font-medium text-gray-900">
-                        {
-                          inscripcion.nombre_completo
-                        }
-                      </td>
+                    <td className="px-5 py-4 text-sm font-medium text-gray-900">
+                      {inscripcion.nombre_completo}
+                    </td>
 
-                      <td className="px-5 py-4 text-sm text-gray-600">
-                        {new Date(
-                          inscripcion.registrado_en
-                        ).toLocaleString(
-                          "es-MX"
-                        )}
-                      </td>
+                    <td className="px-5 py-4 text-sm text-gray-600">
+                      {new Date(inscripcion.registrado_en).toLocaleString(
+                        "es-MX",
+                      )}
+                    </td>
 
-                      <td className="px-5 py-4">
-                        {inscripcion.asistio ? (
-                          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                            Asistió
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
-                            Pendiente
-                          </span>
-                        )}
-                      </td>
+                    <td className="px-5 py-4">
+                      {inscripcion.asistio ? (
+                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                          Asistió
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+                          Pendiente
+                        </span>
+                      )}
+                    </td>
 
-                      <td className="px-5 py-4 text-sm text-gray-600">
-                        {inscripcion.asistio_en
-                          ? new Date(
-                              inscripcion.asistio_en
-                            ).toLocaleString(
-                              "es-MX"
-                            )
-                          : "—"}
-                      </td>
-                    </tr>
-                  )
-                )}
+                    <td className="px-5 py-4 text-sm text-gray-600">
+                      {inscripcion.asistio_en
+                        ? new Date(inscripcion.asistio_en).toLocaleString(
+                            "es-MX",
+                          )
+                        : "—"}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -586,30 +558,16 @@ export default function DetalleEvento() {
       {modalEditarAbierto && (
         <ModalEditarEvento
           evento={evento}
-          cerrar={() =>
-            setModalEditarAbierto(
-              false
-            )
-          }
-          alActualizar={
-            actualizarEvento
-          }
+          cerrar={() => setModalEditarAbierto(false)}
+          alActualizar={actualizarEvento}
         />
       )}
 
       {modalQrAbierto && (
         <ModalQrEvento
-          codigoEvento={
-            evento.codigo_evento
-          }
-          nombreEvento={
-            evento.nombre
-          }
-          cerrar={() =>
-            setModalQrAbierto(
-              false
-            )
-          }
+          codigoEvento={evento.codigo_evento}
+          nombreEvento={evento.nombre}
+          cerrar={() => setModalQrAbierto(false)}
         />
       )}
     </div>
