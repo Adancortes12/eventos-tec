@@ -1,9 +1,9 @@
 import {
   obtenerCookie,
   verificarSesion,
-} from "../lib/session.js";
+} from "../../server/lib/session.js";
 
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { supabaseAdmin } from "../../server/lib/supabaseAdmin.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {

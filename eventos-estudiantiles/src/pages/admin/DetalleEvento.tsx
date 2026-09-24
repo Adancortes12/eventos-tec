@@ -3,7 +3,6 @@ import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 
 import ModalEditarEvento from "../../components/admin/ModalEditarEvento";
 import ModalQrEvento from "../../components/admin/ModalQrEvento";
-import { supabase } from "../../lib/supabase";
 
 type Evento = {
   id: string;
@@ -38,58 +37,30 @@ type DatosDetalle = {
   inscripciones: Inscripcion[];
 };
 
-async function obtenerDatosEvento(id: string): Promise<DatosDetalle> {
-  const { data: eventoData, error: eventoError } = await supabase
-    .from("eventos")
-    .select(
-      `
-  id,
-  codigo_evento,
-  nombre,
-  descripcion,
-  fecha_evento,
-  hora_evento,
-  estado,
-  fecha_activacion,
-  duracion_minutos,
-  cierre_inscripcion
-`,
-    )
-    .eq("id", id)
-    .single();
+async function obtenerDatosEvento(
+  id: string
+): Promise<DatosDetalle> {
+  const respuesta = await fetch(
+    `/api/eventos/detalle?eventoId=${encodeURIComponent(id)}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
 
-  if (eventoError || !eventoData) {
-    console.error(eventoError);
+  const datos = await respuesta.json();
 
-    throw new Error("No se pudo cargar el evento.");
-  }
-
-  const { data: inscripcionesData, error: inscripcionesError } = await supabase
-    .from("inscripciones")
-    .select(
-      `
-      id,
-      numero_estudiante,
-      nombre_completo,
-      registrado_en,
-      asistio,
-      asistio_en
-    `,
-    )
-    .eq("evento_id", id)
-    .order("registrado_en", {
-      ascending: false,
-    });
-
-  if (inscripcionesError) {
-    console.error(inscripcionesError);
-
-    throw new Error("No se pudieron cargar las inscripciones.");
+  if (!respuesta.ok) {
+    throw new Error(
+      datos.error ??
+        "No se pudo cargar el evento."
+    );
   }
 
   return {
-    evento: eventoData,
-    inscripciones: inscripcionesData ?? [],
+    evento: datos.evento,
+    inscripciones:
+      datos.inscripciones ?? [],
   };
 }
 

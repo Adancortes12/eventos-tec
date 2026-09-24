@@ -6,7 +6,7 @@ import {
 } from "../lib/session.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "PATCH") {
+  if (req.method !== "DELETE") {
     return res.status(405).json({
       error: "Método no permitido.",
     });
@@ -70,19 +70,19 @@ export default async function handler(req, res) {
     }
 
     // 3. Solo admin y superadmin
-    const puedeFinalizar =
+    const puedeEliminar =
       maestro.rol_sistema === "admin" ||
       maestro.rol_sistema ===
         "superadmin";
 
-    if (!puedeFinalizar) {
+    if (!puedeEliminar) {
       return res.status(403).json({
         error:
-          "No tienes permisos para finalizar eventos.",
+          "No tienes permisos para eliminar eventos.",
       });
     }
 
-    // 4. Obtener evento
+    // 4. Obtener ID
     const { eventoId } =
       req.body ?? {};
 
@@ -96,16 +96,16 @@ export default async function handler(req, res) {
       });
     }
 
+    // 5. Comprobar que exista
     const {
-      data: eventoActual,
+      data: evento,
       error: errorEvento,
     } = await supabaseAdmin
       .from("eventos")
       .select(`
         id,
         codigo_evento,
-        nombre,
-        estado
+        nombre
       `)
       .eq("id", eventoId)
       .maybeSingle();
@@ -122,66 +122,77 @@ export default async function handler(req, res) {
       });
     }
 
-    if (!eventoActual) {
+    if (!evento) {
       return res.status(404).json({
         error:
           "El evento no existe.",
       });
     }
 
-    if (
-      eventoActual.estado ===
-      "finalizado"
-    ) {
-      return res.status(400).json({
-        error:
-          "El evento ya está finalizado.",
-      });
-    }
-
-    // 5. Finalizar
+    // 6. Revisar inscripciones
     const {
-      data: evento,
-      error: errorActualizacion,
+      count,
+      error: errorInscripciones,
     } = await supabaseAdmin
-      .from("eventos")
-      .update({
-        estado: "finalizado",
+      .from("inscripciones")
+      .select("id", {
+        count: "exact",
+        head: true,
       })
-      .eq("id", eventoId)
-      .select(`
-        id,
-        codigo_evento,
-        nombre,
-        estado
-      `)
-      .single();
+      .eq("evento_id", eventoId);
 
-    if (errorActualizacion) {
+    if (errorInscripciones) {
       console.error(
-        "Error finalizando evento:",
-        errorActualizacion
+        "Error consultando inscripciones:",
+        errorInscripciones
       );
 
       return res.status(500).json({
         error:
-          "No se pudo finalizar el evento.",
+          "No se pudo verificar si el evento tiene inscripciones.",
+      });
+    }
+
+    if ((count ?? 0) > 0) {
+      return res.status(409).json({
+        error:
+          "No puedes eliminar un evento que ya tiene estudiantes registrados.",
+      });
+    }
+
+    // 7. Eliminar
+    const {
+      error: errorEliminar,
+    } = await supabaseAdmin
+      .from("eventos")
+      .delete()
+      .eq("id", eventoId);
+
+    if (errorEliminar) {
+      console.error(
+        "Error eliminando evento:",
+        errorEliminar
+      );
+
+      return res.status(500).json({
+        error:
+          "No se pudo eliminar el evento.",
       });
     }
 
     return res.status(200).json({
-      finalizado: true,
-      evento,
+      eliminado: true,
     });
   } catch (error) {
     console.error(
-      "Error finalizando evento:",
+      "Error eliminando evento:",
       error
     );
 
     return res.status(500).json({
       error:
-        "Ocurrió un error al finalizar el evento.",
+        "Ocurrió un error al eliminar el evento.",
     });
   }
 }
+

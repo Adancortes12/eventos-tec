@@ -1,14 +1,6 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  NavLink,
-  Outlet,
-  useLocation,
-  useNavigate,
-} from "react-router";
+import { useEffect, useState } from "react";
+import InstalarPWA from "../InstalarPWA";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 
 import {
   cerrarSesionSitec,
@@ -31,10 +23,7 @@ type UsuarioMaestro = Extract<
 export type ContextoAdmin = {
   abrirModalNuevoEvento: () => void;
 
-  rol:
-    | "maestro"
-    | "admin"
-    | "superadmin";
+  rol: "maestro" | "admin" | "superadmin";
 
   puedeCrearEventos: boolean;
 };
@@ -43,53 +32,29 @@ export default function LayoutAdmin() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [
-    usuario,
-    setUsuario,
-  ] =
-    useState<UsuarioMaestro | null>(
-      null
-    );
+  const [usuario, setUsuario] = useState<UsuarioMaestro | null>(null);
 
-  const [
-    cargandoUsuario,
-    setCargandoUsuario,
-  ] = useState(true);
+  const [cargandoUsuario, setCargandoUsuario] = useState(true);
 
-  const [
-    menuAbierto,
-    setMenuAbierto,
-  ] = useState(false);
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
-  const [
-    modalNuevoEventoAbierto,
-    setModalNuevoEventoAbierto,
-  ] = useState(false);
+  const [modalNuevoEventoAbierto, setModalNuevoEventoAbierto] = useState(false);
 
-  const [
-    eventoCreado,
-    setEventoCreado,
-  ] = useState<EventoCreado | null>(
-    null
-  );
+  const [eventoCreado, setEventoCreado] = useState<EventoCreado | null>(null);
 
   /*
    * CARGAR USUARIO SITEc
    */
   useEffect(() => {
     async function cargarUsuario() {
-      const sesion =
-        await obtenerSesion();
+      const sesion = await obtenerSesion();
 
       /*
        * RutaProtegida ya hace esta
        * validación, pero mantenemos
        * una segunda comprobación aquí.
        */
-      if (
-        !sesion ||
-        sesion.tipo !== "maestro"
-      ) {
+      if (!sesion || sesion.tipo !== "maestro") {
         navigate("/", {
           replace: true,
         });
@@ -105,99 +70,78 @@ export default function LayoutAdmin() {
        * necesitan entrar al dashboard
        * administrativo.
        */
+
       if (
-        sesion.rol === "maestro" &&
-        location.pathname === "/admin"
+        sesion.rol !== "superadmin" &&
+        location.pathname.startsWith("/admin/maestros")
       ) {
-        navigate(
-          "/admin/eventos",
-          {
-            replace: true,
-          }
-        );
+        navigate("/admin/eventos", {
+          replace: true,
+        });
+
+        return;
       }
     }
 
     cargarUsuario();
-  }, [
-    navigate,
-    location.pathname,
-  ]);
+  }, [navigate, location.pathname]);
 
   /*
    * PERMISOS
    */
   const puedeCrearEventos =
-    usuario?.rol === "admin" ||
-    usuario?.rol ===
-      "superadmin";
+    usuario?.rol === "admin" || usuario?.rol === "superadmin";
 
-  const puedeVerDashboard =
-    usuario?.rol === "admin" ||
-    usuario?.rol ===
-      "superadmin";
+  const puedeVerDashboard = true;
 
+  const puedeAdministrarMaestros = usuario?.rol === "superadmin";
   /*
    * ABRIR NUEVO EVENTO
    */
-  const abrirModalNuevoEvento =
-    () => {
-      if (!puedeCrearEventos) {
-        return;
-      }
+  const abrirModalNuevoEvento = () => {
+    if (!puedeCrearEventos) {
+      return;
+    }
 
-      setModalNuevoEventoAbierto(
-        true
-      );
+    setModalNuevoEventoAbierto(true);
 
-      setMenuAbierto(false);
-    };
-
+    setMenuAbierto(false);
+  };
+  <div className="mb-3">
+    <InstalarPWA />
+  </div>;
   /*
    * CERRAR SESIÓN
    */
-  const cerrarSesion =
-    async () => {
-      await cerrarSesionSitec();
-    };
+  const cerrarSesion = async () => {
+    await cerrarSesionSitec();
+  };
 
   /*
    * EVENTO CREADO
    */
-  const alCrearEvento = (
-    evento: EventoCreado
-  ) => {
-    setModalNuevoEventoAbierto(
-      false
-    );
+  const alCrearEvento = (evento: EventoCreado) => {
+    setModalNuevoEventoAbierto(false);
 
     setEventoCreado(evento);
   };
 
-  const verEventoCreado =
-    () => {
-      if (!eventoCreado) {
-        return;
-      }
+  const verEventoCreado = () => {
+    if (!eventoCreado) {
+      return;
+    }
 
-      const id =
-        eventoCreado.id;
+    const id = eventoCreado.id;
 
-      setEventoCreado(null);
+    setEventoCreado(null);
 
-      navigate(
-        `/admin/eventos/${id}`
-      );
-    };
+    navigate(`/admin/eventos/${id}`);
+  };
 
   /*
    * CLASE DE LOS LINKS
    */
-  const enlaceClase = ({
-    isActive,
-  }: {
-    isActive: boolean;
-  }) =>
+  const enlaceClase = ({ isActive }: { isActive: boolean }) =>
     `flex items-center rounded-xl px-4 py-3 text-sm font-medium transition ${
       isActive
         ? "bg-blue-600 text-white shadow-sm"
@@ -207,15 +151,10 @@ export default function LayoutAdmin() {
   /*
    * CARGANDO SESIÓN
    */
-  if (
-    cargandoUsuario ||
-    !usuario
-  ) {
+  if (cargandoUsuario || !usuario) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-100">
-        <p className="text-sm text-slate-500">
-          Cargando panel...
-        </p>
+        <p className="text-sm text-slate-500">Cargando panel...</p>
       </main>
     );
   }
@@ -224,55 +163,42 @@ export default function LayoutAdmin() {
    * TEXTO DEL ROL
    */
   const nombreRol =
-    usuario.rol ===
-    "superadmin"
+    usuario.rol === "superadmin"
       ? "Superadministrador"
-      : usuario.rol ===
-          "admin"
+      : usuario.rol === "admin"
         ? "Administrador"
         : "Maestro";
 
   const descripcionRol =
-    usuario.rol ===
-    "superadmin"
+    usuario.rol === "superadmin"
       ? "Control total del sistema"
-      : usuario.rol ===
-          "admin"
+      : usuario.rol === "admin"
         ? "Gestión de eventos"
         : "Control de asistencia";
 
   return (
     <div className="min-h-screen bg-slate-100">
-
       {/*
        * HEADER MÓVIL
        */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
-
         <div>
-          <p className="font-bold text-slate-900">
-            Eventos Estudiantiles
-          </p>
+          <p className="font-bold text-slate-900">Eventos Estudiantiles</p>
 
-          <p className="text-xs text-slate-500">
-            {nombreRol}
-          </p>
+          <p className="text-xs text-slate-500">{nombreRol}</p>
         </div>
 
-        <button
-          type="button"
-          onClick={() =>
-            setMenuAbierto(
-              !menuAbierto
-            )
-          }
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
-        >
-          {menuAbierto
-            ? "Cerrar"
-            : "Menú"}
-        </button>
+        <div className="flex items-center gap-2">
+          <InstalarPWA />
 
+          <button
+            type="button"
+            onClick={() => setMenuAbierto(!menuAbierto)}
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
+          >
+            {menuAbierto ? "Cerrar" : "Menú"}
+          </button>
+        </div>
       </header>
 
       {/*
@@ -282,9 +208,7 @@ export default function LayoutAdmin() {
         <button
           type="button"
           aria-label="Cerrar menú"
-          onClick={() =>
-            setMenuAbierto(false)
-          }
+          onClick={() => setMenuAbierto(false)}
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
         />
       )}
@@ -294,39 +218,25 @@ export default function LayoutAdmin() {
        */}
       <aside
         className={`fixed left-0 top-0 z-50 h-screen w-72 transform bg-slate-950 text-white transition-transform duration-200 lg:translate-x-0 ${
-          menuAbierto
-            ? "translate-x-0"
-            : "-translate-x-full"
+          menuAbierto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-
         <div className="flex h-full flex-col">
-
           {/*
            * LOGO
            */}
           <div className="border-b border-slate-800 p-6">
-
             <div className="flex items-center gap-3">
-
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-lg font-bold text-white">
                 EA
               </div>
 
               <div>
+                <h1 className="font-bold text-white">Eventos</h1>
 
-                <h1 className="font-bold text-white">
-                  Eventos
-                </h1>
-
-                <p className="text-sm text-slate-400">
-                  Panel de gestión
-                </p>
-
+                <p className="text-sm text-slate-400">Panel de gestión</p>
               </div>
-
             </div>
-
           </div>
 
           {/*
@@ -336,17 +246,13 @@ export default function LayoutAdmin() {
            */}
           {puedeCrearEventos && (
             <div className="p-4 pb-2">
-
               <button
                 type="button"
-                onClick={
-                  abrirModalNuevoEvento
-                }
+                onClick={abrirModalNuevoEvento}
                 className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
               >
                 + Nuevo evento
               </button>
-
             </div>
           )}
 
@@ -354,7 +260,6 @@ export default function LayoutAdmin() {
            * NAVEGACIÓN
            */}
           <nav className="flex-1 space-y-2 overflow-y-auto p-4">
-
             <p className="mb-3 px-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
               Navegación
             </p>
@@ -367,14 +272,8 @@ export default function LayoutAdmin() {
               <NavLink
                 to="/admin"
                 end
-                className={
-                  enlaceClase
-                }
-                onClick={() =>
-                  setMenuAbierto(
-                    false
-                  )
-                }
+                className={enlaceClase}
+                onClick={() => setMenuAbierto(false)}
               >
                 Dashboard
               </NavLink>
@@ -386,75 +285,61 @@ export default function LayoutAdmin() {
              */}
             <NavLink
               to="/admin/eventos"
-              className={
-                enlaceClase
-              }
-              onClick={() =>
-                setMenuAbierto(
-                  false
-                )
-              }
+              className={enlaceClase}
+              onClick={() => setMenuAbierto(false)}
             >
               Eventos
             </NavLink>
 
+            {/* Maestros y administradores */}
+            {puedeAdministrarMaestros && (
+              <NavLink
+                to="/admin/maestros"
+                className={enlaceClase}
+                onClick={() => setMenuAbierto(false)}
+              >
+                Maestros y administradores
+              </NavLink>
+            )}
           </nav>
 
           {/*
            * USUARIO
            */}
           <div className="border-t border-slate-800 p-4">
-
             <div className="mb-3 rounded-xl bg-slate-900 p-4">
-
-              <p className="text-sm font-semibold text-white">
-                {nombreRol}
-              </p>
+              <p className="text-sm font-semibold text-white">{nombreRol}</p>
 
               <p className="mt-1 text-xs text-slate-400">
-                {
-                  usuario.usuarioSitec
-                }
+                {usuario.usuarioSitec}
               </p>
 
-              <p className="mt-2 text-xs text-slate-500">
-                {descripcionRol}
-              </p>
-
+              <p className="mt-2 text-xs text-slate-500">{descripcionRol}</p>
             </div>
 
             <button
               type="button"
-              onClick={
-                cerrarSesion
-              }
+              onClick={cerrarSesion}
               className="w-full rounded-xl border border-red-900/50 px-4 py-3 text-left text-sm font-medium text-red-400 transition hover:bg-red-950/50"
             >
               Cerrar sesión
             </button>
-
           </div>
-
         </div>
-
       </aside>
 
       {/*
        * CONTENIDO
        */}
       <div className="lg:pl-72">
-
         {/*
          * BARRA SUPERIOR PC
          */}
         <header className="hidden h-16 items-center justify-between border-b border-slate-200 bg-white px-8 lg:flex">
-
           <div>
-
             <p className="text-sm font-medium text-slate-500">
               Sistema de eventos estudiantiles
             </p>
-
           </div>
 
           {/*
@@ -463,37 +348,28 @@ export default function LayoutAdmin() {
           {puedeCrearEventos && (
             <button
               type="button"
-              onClick={
-                abrirModalNuevoEvento
-              }
+              onClick={abrirModalNuevoEvento}
               className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
               + Nuevo evento
             </button>
           )}
-
         </header>
 
         {/*
          * PÁGINA ACTUAL
          */}
         <main className="min-h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8">
-
           <div className="mx-auto max-w-7xl">
-
             <Outlet
               context={{
                 abrirModalNuevoEvento,
-                rol:
-                  usuario.rol,
+                rol: usuario.rol,
                 puedeCrearEventos,
               }}
             />
-
           </div>
-
         </main>
-
       </div>
 
       {/*
@@ -505,37 +381,20 @@ export default function LayoutAdmin() {
       {puedeCrearEventos && (
         <>
           <ModalNuevoEvento
-            abierto={
-              modalNuevoEventoAbierto
-            }
-            cerrar={() =>
-              setModalNuevoEventoAbierto(
-                false
-              )
-            }
-            alCrear={
-              alCrearEvento
-            }
+            abierto={modalNuevoEventoAbierto}
+            cerrar={() => setModalNuevoEventoAbierto(false)}
+            alCrear={alCrearEvento}
           />
 
           {eventoCreado && (
             <ModalEventoCreado
-              evento={
-                eventoCreado
-              }
-              cerrar={() =>
-                setEventoCreado(
-                  null
-                )
-              }
-              verEvento={
-                verEventoCreado
-              }
+              evento={eventoCreado}
+              cerrar={() => setEventoCreado(null)}
+              verEvento={verEventoCreado}
             />
           )}
         </>
       )}
-
     </div>
   );
 }

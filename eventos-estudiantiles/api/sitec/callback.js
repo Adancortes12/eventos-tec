@@ -1,5 +1,5 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
-import { crearSesion } from "../lib/session.js";
+import { supabaseAdmin } from "../../server/lib/supabaseAdmin.js";
+import { crearSesion } from "../../server/lib/session.js";
 
 function obtenerCookie(req, nombre) {
   const cookies = req.headers.cookie ?? "";
@@ -696,9 +696,15 @@ res.setHeader(
 );
 
 /*
- * 10. RESPUESTA FINAL
+ * 10. REDIRECCIÓN SEGÚN TIPO DE USUARIO
  */
-return res.redirect(302, "/");
+const destino =
+  usuarioSistema.tipo === "maestro"
+    ? "/admin"
+    : "/";
+
+return res.redirect(302, destino);
+
 } catch (error) {
   console.error(
     "Error callback SITEc:",
