@@ -139,15 +139,15 @@ export default function Eventos() {
       {/* Encabezado */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm font-semibold text-blue-600">
+          <p className="text-sm font-semibold text-[#1B396A]">
             Administración
           </p>
 
-          <h1 className="mt-1 text-3xl font-bold text-slate-900">
+          <h1 className="mt-1 text-3xl font-bold text-[#1F2937]">
             Eventos
           </h1>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-gray-600">
   {puedeCrearEventos
     ? "Consulta y administra los eventos registrados."
     : "Consulta los eventos y registra asistencias."}
@@ -160,7 +160,7 @@ export default function Eventos() {
     onClick={
       abrirModalNuevoEvento
     }
-    className="w-fit rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+    className="w-fit rounded-xl bg-[#1B396A] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
   >
     + Nuevo evento
   </button>
@@ -170,17 +170,17 @@ export default function Eventos() {
       {/* Resumen */}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-gray-600">
             Total
           </p>
 
-          <p className="mt-2 text-3xl font-bold text-slate-900">
+          <p className="mt-2 text-3xl font-bold text-[#1F2937]">
             {eventos.length}
           </p>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-gray-600">
             Activos
           </p>
 
@@ -190,7 +190,7 @@ export default function Eventos() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-gray-600">
             Finalizados
           </p>
 
@@ -217,7 +217,7 @@ export default function Eventos() {
                 )
               }
               placeholder="Buscar por nombre o código..."
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-[#1F2937] outline-none transition focus:border-[#1B396A]"
             />
           </div>
 
@@ -233,7 +233,7 @@ export default function Eventos() {
                 filtroEstado ===
                 "todos"
                   ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  : "bg-[#F5F5F5] text-slate-600 hover:bg-slate-200"
               }`}
             >
               Todos
@@ -250,7 +250,7 @@ export default function Eventos() {
                 filtroEstado ===
                 "activo"
                   ? "bg-green-600 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  : "bg-[#F5F5F5] text-slate-600 hover:bg-slate-200"
               }`}
             >
               Activos
@@ -267,7 +267,7 @@ export default function Eventos() {
                 filtroEstado ===
                 "finalizado"
                   ? "bg-slate-700 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  : "bg-[#F5F5F5] text-slate-600 hover:bg-slate-200"
               }`}
             >
               Finalizados
@@ -279,7 +279,7 @@ export default function Eventos() {
       {/* Estados */}
       {cargando && (
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-slate-500">
+          <p className="text-gray-600">
             Cargando eventos...
           </p>
         </div>
@@ -300,7 +300,7 @@ export default function Eventos() {
               No se encontraron eventos
             </h2>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-gray-600">
               Prueba otra búsqueda o cambia el filtro.
             </p>
           </div>
@@ -313,7 +313,7 @@ export default function Eventos() {
           0 && (
           <>
             <div className="mt-6 flex items-center justify-between">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-gray-600">
                 Mostrando{" "}
                 {
                   eventosFiltrados.length
@@ -336,7 +336,7 @@ export default function Eventos() {
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-3">
-                          <span className="text-xs font-semibold text-blue-600">
+                          <span className="text-xs font-semibold text-[#1B396A]">
                             {
                               evento.codigo_evento
                             }
@@ -357,21 +357,21 @@ export default function Eventos() {
                           </span>
                         </div>
 
-                        <h2 className="mt-3 text-xl font-bold text-slate-900">
+                        <h2 className="mt-3 text-xl font-bold text-[#1F2937]">
                           {
                             evento.nombre
                           }
                         </h2>
 
                         {evento.descripcion && (
-                          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
                             {
                               evento.descripcion
                             }
                           </p>
                         )}
 
-                        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
+                        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">
                           <p>
                             <span className="font-medium text-slate-700">
                               Fecha:
@@ -395,7 +395,7 @@ export default function Eventos() {
                       <div className="flex flex-wrap gap-2 lg:justify-end">
                         <Link
                           to={`/admin/eventos/${evento.id}`}
-                          className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-[#F5F5F5]"
                         >
                           Ver evento
                         </Link>
@@ -404,7 +404,7 @@ export default function Eventos() {
                           "activo" && (
                           <Link
                             to={`/admin/eventos/${evento.id}/escanear`}
-                            className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                            className="rounded-xl bg-[#1B396A] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
                           >
                             Pasar asistencia
                           </Link>

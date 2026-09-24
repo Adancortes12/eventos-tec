@@ -168,7 +168,7 @@ export default function MisEventos() {
    */
   if (cargando) {
     return (
-      <main className="min-h-screen bg-slate-100">
+      <main className="min-h-screen bg-[#F5F5F5]">
         <div className="mx-auto max-w-5xl px-4 py-10">
           <p className="text-center text-slate-500">
             Cargando tus eventos...
@@ -183,12 +183,12 @@ export default function MisEventos() {
    */
   if (!autenticado) {
     return (
-      <main className="min-h-screen bg-slate-100">
+      <main className="min-h-screen bg-[#F5F5F5]">
         <div className="mx-auto max-w-lg px-4 py-16">
 
           <div className="rounded-3xl bg-white p-8 text-center shadow-sm">
 
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-xl">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#E8EDF5] text-xl">
               🔒
             </div>
 
@@ -206,7 +206,7 @@ export default function MisEventos() {
               onClick={
                 iniciarSesionSitec
               }
-              className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+              className="mt-6 w-full rounded-xl bg-[#1B396A] px-5 py-3 font-semibold text-white transition hover:opacity-90"
             >
               Iniciar sesión con SIITEC
             </button>
@@ -226,7 +226,7 @@ export default function MisEventos() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
+    <main className="min-h-screen bg-[#F5F5F5]">
 
       <div className="mx-auto max-w-5xl px-4 py-10">
 
@@ -236,7 +236,7 @@ export default function MisEventos() {
 
             <Link
               to="/"
-              className="text-sm font-medium text-blue-600 hover:text-blue-700"
+              className="text-sm font-medium text-[#1B396A] hover:opacity-80"
             >
               ← Volver a eventos
             </Link>
@@ -277,7 +277,7 @@ export default function MisEventos() {
 
             <Link
               to="/"
-              className="mt-6 inline-block rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+              className="mt-6 inline-block rounded-xl bg-[#1B396A] px-5 py-3 font-semibold text-white hover:opacity-90"
             >
               Ver eventos disponibles
             </Link>
@@ -310,7 +310,7 @@ export default function MisEventos() {
 
                         <div>
 
-                          <p className="text-sm font-semibold text-blue-600">
+                          <p className="text-sm font-semibold text-[#1B396A]">
                             {
                               evento.codigo_evento
                             }
@@ -344,7 +344,7 @@ export default function MisEventos() {
 
                       <div className="mt-5 grid grid-cols-2 gap-3">
 
-                        <div className="rounded-xl bg-slate-50 p-3">
+                        <div className="rounded-xl bg-white p-3">
 
                           <p className="text-xs font-semibold uppercase text-slate-400">
                             Fecha
@@ -358,7 +358,7 @@ export default function MisEventos() {
 
                         </div>
 
-                        <div className="rounded-xl bg-slate-50 p-3">
+                        <div className="rounded-xl bg-white p-3">
 
                           <p className="text-xs font-semibold uppercase text-slate-400">
                             Hora
@@ -403,7 +403,7 @@ export default function MisEventos() {
                                 null
                               )
                             }
-                            className="mt-4 w-full rounded-xl border border-slate-300 px-4 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-50"
+                            className="mt-4 w-full rounded-xl border border-slate-300 px-4 py-2.5 font-semibold text-slate-700 transition hover:bg-white"
                           >
                             Ocultar QR
                           </button>
@@ -417,7 +417,7 @@ export default function MisEventos() {
                               inscripcion.inscripcionId
                             )
                           }
-                          className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+                          className="mt-6 w-full rounded-xl bg-[#1B396A] px-5 py-3 font-semibold text-white transition hover:opacity-90"
                         >
                           Mostrar mi QR
                         </button>
@@ -425,7 +425,7 @@ export default function MisEventos() {
 
                       <Link
                         to={`/evento/${evento.codigo_evento}`}
-                        className="mt-3 block text-center text-sm font-semibold text-blue-600 hover:text-blue-700"
+                        className="mt-3 block text-center text-sm font-semibold text-[#1B396A] hover:opacity-80"
                       >
                         Ver evento
                       </Link>

@@ -292,7 +292,7 @@ export default function DetalleEvento() {
     <div>
       <Link
         to="/admin/eventos"
-        className="text-sm font-medium text-blue-600 transition hover:text-blue-700"
+        className="text-sm font-medium text-[#1B396A] transition hover:opacity-80"
       >
         ← Volver a eventos
       </Link>
@@ -301,7 +301,7 @@ export default function DetalleEvento() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm font-semibold text-blue-600">
+              <span className="text-sm font-semibold text-[#1B396A]">
                 {evento.codigo_evento}
               </span>
 
@@ -316,7 +316,7 @@ export default function DetalleEvento() {
               </span>
             </div>
 
-            <h1 className="mt-3 text-3xl font-bold text-gray-900">
+            <h1 className="mt-3 text-3xl font-bold text-[#1F2937]">
               {evento.nombre}
             </h1>
 
@@ -326,7 +326,7 @@ export default function DetalleEvento() {
               </p>
             )}
 
-            <div className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm text-gray-500">
+            <div className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm text-gray-600">
               <p>
                 <span className="font-medium text-gray-700">Fecha:</span>{" "}
                 {evento.fecha_evento}
@@ -352,7 +352,7 @@ export default function DetalleEvento() {
             <button
               type="button"
               onClick={() => setModalQrAbierto(true)}
-              className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
+              className="rounded-lg border border-[#1B396A]/30 px-4 py-2 text-sm font-semibold text-[#1B396A] transition hover:bg-[#EEF2F7]"
             >
               Ver enlace y QR
             </button>
@@ -361,7 +361,7 @@ export default function DetalleEvento() {
               <button
                 type="button"
                 onClick={() => setModalEditarAbierto(true)}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-[#F5F5F5]"
               >
                 Editar evento
               </button>
@@ -392,15 +392,15 @@ export default function DetalleEvento() {
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-xl bg-white p-5 shadow">
-          <p className="text-sm font-medium text-gray-500">Registrados</p>
+          <p className="text-sm font-medium text-gray-600">Registrados</p>
 
-          <p className="mt-2 text-3xl font-bold text-gray-900">
+          <p className="mt-2 text-3xl font-bold text-[#1F2937]">
             {totalRegistrados}
           </p>
         </div>
 
         <div className="rounded-xl bg-white p-5 shadow">
-          <p className="text-sm font-medium text-gray-500">Asistieron</p>
+          <p className="text-sm font-medium text-gray-600">Asistieron</p>
 
           <p className="mt-2 text-3xl font-bold text-green-600">
             {totalAsistieron}
@@ -408,7 +408,7 @@ export default function DetalleEvento() {
         </div>
 
         <div className="rounded-xl bg-white p-5 shadow">
-          <p className="text-sm font-medium text-gray-500">Pendientes</p>
+          <p className="text-sm font-medium text-gray-600">Pendientes</p>
 
           <p className="mt-2 text-3xl font-bold text-yellow-600">
             {totalPendientes}
@@ -416,11 +416,11 @@ export default function DetalleEvento() {
         </div>
 
         <div className="rounded-xl bg-white p-5 shadow">
-          <p className="text-sm font-medium text-gray-500">
+          <p className="text-sm font-medium text-gray-600">
             Porcentaje de asistencia
           </p>
 
-          <p className="mt-2 text-3xl font-bold text-blue-600">
+          <p className="mt-2 text-3xl font-bold text-[#1B396A]">
             {porcentajeAsistencia}%
           </p>
         </div>
@@ -430,16 +430,16 @@ export default function DetalleEvento() {
         <div className="border-b border-gray-200 p-5 sm:p-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-[#1F2937]">
                 Estudiantes registrados
               </h2>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-600">
                 Consulta el registro y estado de asistencia de los estudiantes.
               </p>
             </div>
 
-            <p className="text-sm font-medium text-gray-500">
+            <p className="text-sm font-medium text-gray-600">
               Total: {totalRegistrados}
             </p>
           </div>
@@ -451,7 +451,7 @@ export default function DetalleEvento() {
               Aún no hay estudiantes registrados.
             </p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-600">
               Los estudiantes aparecerán aquí cuando se registren al evento.
             </p>
           </div>
@@ -489,7 +489,7 @@ export default function DetalleEvento() {
                       {inscripcion.numero_estudiante}
                     </td>
 
-                    <td className="px-5 py-4 text-sm font-medium text-gray-900">
+                    <td className="px-5 py-4 text-sm font-medium text-[#1F2937]">
                       {inscripcion.nombre_completo}
                     </td>
 

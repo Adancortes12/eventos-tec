@@ -236,7 +236,7 @@ export default function RegistroEvento() {
 
           <Link
             to="/"
-            className="mt-6 inline-block rounded-xl bg-blue-600 px-5 py-2.5 font-semibold text-white hover:bg-blue-700"
+            className="mt-6 inline-block rounded-xl bg-[#1B396A] px-5 py-2.5 font-semibold text-white hover:opacity-90"
           >
             Volver al inicio
           </Link>
@@ -290,7 +290,7 @@ export default function RegistroEvento() {
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <Link
                 to="/mis-eventos"
-                className="rounded-xl bg-blue-600 px-5 py-3 text-center font-semibold text-white hover:bg-blue-700"
+                className="rounded-xl bg-[#1B396A] px-5 py-3 text-center font-semibold text-white hover:opacity-90"
               >
                 Mis eventos
               </Link>
@@ -313,14 +313,14 @@ export default function RegistroEvento() {
       <div className="mx-auto max-w-2xl px-4 py-10">
         <Link
           to="/"
-          className="text-sm font-medium text-blue-600 hover:text-blue-700"
+          className="text-sm font-medium text-[#1B396A] hover:opacity-80"
         >
           ← Volver a eventos
         </Link>
 
         <div className="mt-5 overflow-hidden rounded-3xl bg-white shadow-sm">
-          <div className="bg-blue-600 p-8 text-white">
-            <p className="text-sm font-medium text-blue-100">
+          <div className="bg-[#1B396A] p-8 text-white">
+            <p className="text-sm font-medium text-white/80">
               {evento.codigo_evento}
             </p>
 
@@ -376,7 +376,7 @@ export default function RegistroEvento() {
                 <button
                   type="button"
                   onClick={iniciarSesionSitec}
-                  className="mt-5 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+                  className="mt-5 w-full rounded-xl bg-[#1B396A] px-5 py-3 font-semibold text-white transition hover:opacity-90"
                 >
                   Iniciar sesión con SITEc
                 </button>
@@ -402,8 +402,8 @@ export default function RegistroEvento() {
             */}
             {usuario?.tipo === "estudiante" && (
               <div className="mt-8">
-                <div className="rounded-xl bg-blue-50 p-4">
-                  <p className="text-sm text-blue-800">
+                <div className="rounded-xl bg-[#EEF2F7] p-4">
+                  <p className="text-sm text-[#1B396A]">
                     Estás identificado con tu cuenta de SITEc. Tus datos se
                     obtendrán automáticamente.
                   </p>
@@ -425,7 +425,7 @@ export default function RegistroEvento() {
     ${
       yaRegistrado
         ? "cursor-not-allowed bg-green-600"
-        : "bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        : "bg-[#1B396A] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
     }
   `}
                 >
@@ -438,7 +438,7 @@ export default function RegistroEvento() {
                 {yaRegistrado && (
                   <Link
                     to="/mis-eventos"
-                    className="mt-3 block text-center text-sm font-semibold text-blue-600 hover:text-blue-700"
+                    className="mt-3 block text-center text-sm font-semibold text-[#1B396A] hover:opacity-80"
                   >
                     Ver mi código QR
                   </Link>

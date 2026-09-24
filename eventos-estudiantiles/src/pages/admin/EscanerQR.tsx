@@ -366,12 +366,12 @@ export default function EscanerQR() {
       <div className="mb-6">
         <Link
           to={`/admin/eventos/${id}`}
-          className="text-sm font-medium text-blue-600"
+          className="text-sm font-medium text-[#1B396A]"
         >
           ← Volver al evento
         </Link>
 
-        <h1 className="mt-4 text-3xl font-bold text-gray-900">
+        <h1 className="mt-4 text-3xl font-bold text-[#1F2937]">
           Pasar asistencia
         </h1>
 
@@ -384,7 +384,7 @@ export default function EscanerQR() {
 
       <div className="mx-auto max-w-2xl rounded-2xl bg-white p-4 shadow sm:p-6">
         {iniciandoCamara && (
-          <div className="mb-4 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-700">
+          <div className="mb-4 rounded-lg bg-[#EEF2F7] p-4 text-center text-sm text-[#1B396A]">
             Abriendo cámara...
           </div>
         )}

@@ -175,7 +175,7 @@ export default function Maestros() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-[#1F2937]">
           Maestros y administradores
         </h1>
 
@@ -198,14 +198,14 @@ export default function Maestros() {
               No hay maestros registrados.
             </p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-600">
               Aparecerán aquí después de iniciar sesión con SIITEC.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[750px] text-left">
-              <thead className="bg-gray-50">
+              <thead className="bg-white">
                 <tr>
                   <th className="px-5 py-3 text-sm font-semibold text-gray-600">
                     Usuario SIITEC
@@ -232,7 +232,7 @@ export default function Maestros() {
               <tbody>
                 {maestros.map((maestro) => (
                   <tr key={maestro.id} className="border-t border-gray-100">
-                    <td className="px-5 py-4 text-sm font-medium text-gray-900">
+                    <td className="px-5 py-4 text-sm font-medium text-[#1F2937]">
                       {maestro.usuario_sitec}
                     </td>
 
@@ -241,7 +241,7 @@ export default function Maestros() {
                     </td>
 
                     <td className="px-5 py-4">
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                      <span className="rounded-full bg-[#F5F5F5] px-3 py-1 text-xs font-semibold text-gray-700">
                         {obtenerEtiquetaRol(maestro.rol_sistema)}
                       </span>
                     </td>
@@ -260,13 +260,13 @@ export default function Maestros() {
 
                     <td className="px-5 py-4 text-right">
                       {maestro.rol_sistema === "superadmin" ? (
-                        <span className="text-sm text-gray-400">Protegido</span>
+                        <span className="text-sm text-gray-500">Protegido</span>
                       ) : (
                         <button
                           type="button"
                           disabled={actualizandoId === maestro.id}
                           onClick={() => cambiarRol(maestro)}
-                          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+                          className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-white disabled:opacity-50"
                         >
                           {actualizandoId === maestro.id
                             ? "Guardando..."

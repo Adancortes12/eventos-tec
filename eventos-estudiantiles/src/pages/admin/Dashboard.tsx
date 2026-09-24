@@ -163,7 +163,7 @@ export default function Dashboard() {
   if (cargando) {
     return (
       <div className="py-16 text-center">
-        <p className="text-slate-500">
+        <p className="text-gray-600">
           Cargando dashboard...
         </p>
       </div>
@@ -175,15 +175,15 @@ export default function Dashboard() {
       {/* Encabezado */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm font-semibold text-blue-600">
+          <p className="text-sm font-semibold text-[#1B396A]">
             Panel administrativo
           </p>
 
-          <h1 className="mt-1 text-3xl font-bold text-slate-900">
+          <h1 className="mt-1 text-3xl font-bold text-[#1F2937]">
             Dashboard
           </h1>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-gray-600">
             Consulta rápidamente el estado de tus
             eventos y asistencias.
           </p>
@@ -192,7 +192,7 @@ export default function Dashboard() {
         <button
           type="button"
           onClick={abrirModalNuevoEvento}
-          className="w-fit rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+          className="w-fit rounded-xl bg-[#1B396A] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
         >
           + Crear evento
         </button>
@@ -207,11 +207,11 @@ export default function Dashboard() {
       {/* Estadísticas */}
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-gray-600">
             Eventos totales
           </p>
 
-          <p className="mt-3 text-4xl font-bold text-slate-900">
+          <p className="mt-3 text-4xl font-bold text-[#1F2937]">
             {totalEventos}
           </p>
 
@@ -221,7 +221,7 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-gray-600">
             Eventos activos
           </p>
 
@@ -235,11 +235,11 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-gray-600">
             Estudiantes registrados
           </p>
 
-          <p className="mt-3 text-4xl font-bold text-blue-600">
+          <p className="mt-3 text-4xl font-bold text-[#1B396A]">
             {totalRegistrados}
           </p>
 
@@ -249,7 +249,7 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-gray-600">
             Asistencias
           </p>
 
@@ -265,7 +265,7 @@ export default function Dashboard() {
 
       {/* Acciones rápidas */}
       <div className="mt-8">
-        <h2 className="text-lg font-bold text-slate-900">
+        <h2 className="text-lg font-bold text-[#1F2937]">
           Acciones rápidas
         </h2>
 
@@ -273,26 +273,26 @@ export default function Dashboard() {
           <button
             type="button"
             onClick={abrirModalNuevoEvento}
-            className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-blue-300 hover:shadow"
+            className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-[#1B396A] hover:shadow"
           >
-            <p className="font-semibold text-slate-900">
+            <p className="font-semibold text-[#1F2937]">
               Crear nuevo evento
             </p>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-gray-600">
               Registra un evento y genera su enlace y QR.
             </p>
           </button>
 
           <Link
             to="/admin/eventos"
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow"
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#1B396A] hover:shadow"
           >
-            <p className="font-semibold text-slate-900">
+            <p className="font-semibold text-[#1F2937]">
               Administrar eventos
             </p>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-gray-600">
               Consulta registros, asistencias y eventos.
             </p>
           </Link>
@@ -303,18 +303,18 @@ export default function Dashboard() {
       <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-3 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-[#1F2937]">
               Eventos recientes
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-gray-600">
               Últimos eventos registrados.
             </p>
           </div>
 
           <Link
             to="/admin/eventos"
-            className="w-fit text-sm font-semibold text-blue-600 hover:text-blue-700"
+            className="w-fit text-sm font-semibold text-[#1B396A] hover:opacity-80"
           >
             Ver todos →
           </Link>
@@ -326,7 +326,7 @@ export default function Dashboard() {
               Todavía no hay eventos.
             </p>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-gray-600">
               Crea uno para comenzar.
             </p>
           </div>
@@ -335,11 +335,11 @@ export default function Dashboard() {
             {eventosRecientes.map((evento) => (
               <div
                 key={evento.id}
-                className="flex flex-col gap-4 p-5 transition hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-4 p-5 transition hover:bg-[#F5F5F5] sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold text-blue-600">
+                    <span className="text-xs font-semibold text-[#1B396A]">
                       {evento.codigo_evento}
                     </span>
 
@@ -356,11 +356,11 @@ export default function Dashboard() {
                     </span>
                   </div>
 
-                  <h3 className="mt-2 font-semibold text-slate-900">
+                  <h3 className="mt-2 font-semibold text-[#1F2937]">
                     {evento.nombre}
                   </h3>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-gray-600">
                     {evento.fecha_evento} ·{" "}
                     {evento.hora_evento}
                   </p>
@@ -377,7 +377,7 @@ export default function Dashboard() {
                   {evento.estado === "activo" && (
                     <Link
                       to={`/admin/eventos/${evento.id}/escanear`}
-                      className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                      className="rounded-lg bg-[#1B396A] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                     >
                       Pasar asistencia
                     </Link>
