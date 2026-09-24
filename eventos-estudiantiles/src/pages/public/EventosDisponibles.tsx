@@ -351,20 +351,20 @@ export default function EventosDisponibles() {
       {/*
        * HERO
        */}
-      <section className="border-b border-slate-200 bg-white">
+<section className="border-b border-slate-200 bg-white">
 
   <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 sm:py-16">
 
-    <p className="font-semibold text-[#1B396A]">
+    <p className="font-semibold !text-[#1B396A]">
       Eventos disponibles
     </p>
 
-    <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-bold tracking-tight text-[#1F2937] sm:text-4xl">
+    <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-bold tracking-tight !text-[#1F2937] sm:text-4xl">
       Encuentra los próximos eventos y
       regístrate fácilmente
     </h1>
 
-    <p className="mx-auto mt-5 max-w-3xl text-base text-[#4B5563]">
+    <p className="mx-auto mt-5 max-w-3xl text-base !text-[#4B5563]">
       Selecciona un evento, inicia sesión con
       SIITEC y obtén tu código QR de acceso.
     </p>
