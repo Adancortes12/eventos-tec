@@ -356,7 +356,65 @@ let usuarioSistema = null;
 /*
  * ESTUDIANTE
  */
+/*
+ * Primero verificamos si el usuario
+ * está registrado como maestro.
+ */
+const {
+  data: maestroExistente,
+  error: errorBusquedaMaestro,
+} = await supabaseAdmin
+  .from("maestros")
+  .select(`
+    id,
+    sitec_usuario_id,
+    usuario_sitec,
+    rol_sistema,
+    activo
+  `)
+  .eq(
+    "sitec_usuario_id",
+    usuarioNormalizado.sitecUsuarioId
+  )
+  .maybeSingle();
+
+
+if (errorBusquedaMaestro) {
+  console.error(
+    "Error buscando maestro:",
+    errorBusquedaMaestro
+  );
+
+  return res.status(500).json({
+    error:
+      "No se pudo consultar el usuario maestro.",
+  });
+}
+
+
+/*
+ * Si existe como maestro,
+ * entra al panel administrativo.
+ */
 if (
+  maestroExistente &&
+  maestroExistente.activo
+) {
+  usuarioSistema = {
+    id: maestroExistente.id,
+    tipo: "maestro",
+    rol: maestroExistente.rol_sistema,
+    usuarioSitec:
+      maestroExistente.usuario_sitec,
+  };
+}
+
+
+/*
+ * Si NO es maestro,
+ * continúa como estudiante.
+ */
+else if (
   usuarioNormalizado.tipoUsuario ===
   "alumno"
 ) {
@@ -368,6 +426,7 @@ if (
         "No se pudo identificar el número de estudiante.",
     });
   }
+
 
   const {
     data: estudianteExistente,
@@ -385,6 +444,7 @@ if (
     )
     .maybeSingle();
 
+
   if (errorBusquedaEstudiante) {
     console.error(
       "Error buscando estudiante:",
@@ -397,33 +457,36 @@ if (
     });
   }
 
+
   /*
-   * Si ya existe, actualizamos sus
-   * identificadores básicos.
+   * Si ya existe, actualizamos.
    */
   if (estudianteExistente) {
+
     const {
       data: estudianteActualizado,
       error: errorActualizacion,
-    } = await supabaseAdmin
-      .from("estudiantes")
-      .update({
-        numero_estudiante:
-          usuarioNormalizado.numeroEstudiante,
+    } =
+      await supabaseAdmin
+        .from("estudiantes")
+        .update({
+          numero_estudiante:
+            usuarioNormalizado.numeroEstudiante,
 
-        actualizado_en:
-          new Date().toISOString(),
-      })
-      .eq(
-        "id",
-        estudianteExistente.id
-      )
-      .select(`
-        id,
-        sitec_usuario_id,
-        numero_estudiante
-      `)
-      .single();
+          actualizado_en:
+            new Date().toISOString(),
+        })
+        .eq(
+          "id",
+          estudianteExistente.id
+        )
+        .select(`
+          id,
+          sitec_usuario_id,
+          numero_estudiante
+        `)
+        .single();
+
 
     if (errorActualizacion) {
       console.error(
@@ -437,34 +500,43 @@ if (
       });
     }
 
+
     usuarioSistema = {
-      id: estudianteActualizado.id,
-      tipo: "estudiante",
+      id:
+        estudianteActualizado.id,
+
+      tipo:
+        "estudiante",
     };
+
   }
+
 
   /*
    * Si no existe, lo creamos.
    */
   else {
+
     const {
       data: estudianteNuevo,
       error: errorCreacion,
-    } = await supabaseAdmin
-      .from("estudiantes")
-      .insert({
-        sitec_usuario_id:
-          usuarioNormalizado.sitecUsuarioId,
+    } =
+      await supabaseAdmin
+        .from("estudiantes")
+        .insert({
+          sitec_usuario_id:
+            usuarioNormalizado.sitecUsuarioId,
 
-        numero_estudiante:
-          usuarioNormalizado.numeroEstudiante,
-      })
-      .select(`
-        id,
-        sitec_usuario_id,
-        numero_estudiante
-      `)
-      .single();
+          numero_estudiante:
+            usuarioNormalizado.numeroEstudiante,
+        })
+        .select(`
+          id,
+          sitec_usuario_id,
+          numero_estudiante
+        `)
+        .single();
+
 
     if (errorCreacion) {
       console.error(
@@ -478,9 +550,13 @@ if (
       });
     }
 
+
     usuarioSistema = {
-      id: estudianteNuevo.id,
-      tipo: "estudiante",
+      id:
+        estudianteNuevo.id,
+
+      tipo:
+        "estudiante",
     };
   }
 }
