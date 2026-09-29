@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { db } from "../lib/db.js";
 
 import {
   obtenerCookie,
@@ -27,32 +27,22 @@ async function verificarSuperadmin(req) {
     };
   }
 
-  const {
-    data: maestro,
-    error,
-  } = await supabaseAdmin
-    .from("maestros")
-    .select(`
-      id,
-      rol_sistema,
-      activo
-    `)
-    .eq("id", sesion.id)
-    .maybeSingle();
-
-  if (error) {
-    console.error(
-      "Error verificando superadmin:",
-      error
+  const resultado =
+    await db.query(
+      `
+        SELECT
+          id,
+          rol_sistema,
+          activo
+        FROM maestros
+        WHERE id = $1
+        LIMIT 1
+      `,
+      [sesion.id]
     );
 
-    return {
-      permitido: false,
-      status: 500,
-      error:
-        "No se pudo verificar el usuario.",
-    };
-  }
+  const maestro =
+    resultado.rows[0];
 
   if (
     !maestro ||
@@ -106,39 +96,24 @@ export default async function handler(
      * LISTAR MAESTROS
      */
     if (req.method === "GET") {
-      const {
-        data,
-        error,
-      } = await supabaseAdmin
-        .from("maestros")
-        .select(`
-          id,
-          sitec_usuario_id,
-          sitec_empleado_id,
-          usuario_sitec,
-          rol_sistema,
-          activo,
-          creado_en,
-          actualizado_en
-        `)
-        .order("creado_en", {
-          ascending: false,
-        });
-
-      if (error) {
-        console.error(
-          "Error listando maestros:",
-          error
-        );
-
-        return res.status(500).json({
-          error:
-            "No se pudieron cargar los maestros.",
-        });
-      }
+      const resultado =
+        await db.query(`
+          SELECT
+            id,
+            sitec_usuario_id,
+            sitec_empleado_id,
+            usuario_sitec,
+            rol_sistema,
+            activo,
+            creado_en,
+            actualizado_en
+          FROM maestros
+          ORDER BY creado_en DESC
+        `);
 
       return res.status(200).json({
-        maestros: data ?? [],
+        maestros:
+          resultado.rows,
       });
     }
 
@@ -162,6 +137,10 @@ export default async function handler(
         });
       }
 
+      /*
+       * Desde el panel solamente
+       * se puede asignar maestro/admin.
+       */
       if (
         rol !== "maestro" &&
         rol !== "admin"
@@ -172,31 +151,26 @@ export default async function handler(
         });
       }
 
-      const {
-        data: objetivo,
-        error: errorObjetivo,
-      } = await supabaseAdmin
-        .from("maestros")
-        .select(`
-          id,
-          usuario_sitec,
-          rol_sistema,
-          activo
-        `)
-        .eq("id", maestroId)
-        .maybeSingle();
-
-      if (errorObjetivo) {
-        console.error(
-          "Error consultando maestro:",
-          errorObjetivo
+      /*
+       * CONSULTAR MAESTRO OBJETIVO
+       */
+      const resultadoObjetivo =
+        await db.query(
+          `
+            SELECT
+              id,
+              usuario_sitec,
+              rol_sistema,
+              activo
+            FROM maestros
+            WHERE id = $1
+            LIMIT 1
+          `,
+          [maestroId]
         );
 
-        return res.status(500).json({
-          error:
-            "No se pudo consultar el maestro.",
-        });
-      }
+      const objetivo =
+        resultadoObjetivo.rows[0];
 
       if (!objetivo) {
         return res.status(404).json({
@@ -208,7 +182,7 @@ export default async function handler(
       /*
        * Los superadmin solamente
        * se administran manualmente
-       * desde la base de datos.
+       * desde PostgreSQL.
        */
       if (
         objetivo.rol_sistema ===
@@ -220,34 +194,41 @@ export default async function handler(
         });
       }
 
-      const {
-        data: actualizado,
-        error: errorActualizar,
-      } = await supabaseAdmin
-        .from("maestros")
-        .update({
-          rol_sistema: rol,
-          actualizado_en:
-            new Date().toISOString(),
-        })
-        .eq("id", maestroId)
-        .select(`
-          id,
-          usuario_sitec,
-          rol_sistema,
-          activo
-        `)
-        .single();
-
-      if (errorActualizar) {
-        console.error(
-          "Error actualizando rol:",
-          errorActualizar
+      /*
+       * ACTUALIZAR ROL
+       *
+       * También comprobamos en el UPDATE
+       * que no sea superadmin para proteger
+       * contra cambios concurrentes.
+       */
+      const resultadoActualizacion =
+        await db.query(
+          `
+            UPDATE maestros
+            SET
+              rol_sistema = $1,
+              actualizado_en = NOW()
+            WHERE id = $2
+              AND rol_sistema <> 'superadmin'
+            RETURNING
+              id,
+              usuario_sitec,
+              rol_sistema,
+              activo
+          `,
+          [
+            rol,
+            maestroId,
+          ]
         );
 
-        return res.status(500).json({
+      const actualizado =
+        resultadoActualizacion.rows[0];
+
+      if (!actualizado) {
+        return res.status(403).json({
           error:
-            "No se pudo actualizar el rol.",
+            "No se puede modificar este maestro.",
         });
       }
 
@@ -258,7 +239,8 @@ export default async function handler(
     }
 
     return res.status(405).json({
-      error: "Método no permitido.",
+      error:
+        "Método no permitido.",
     });
   } catch (error) {
     console.error(

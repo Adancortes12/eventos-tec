@@ -2,7 +2,6 @@ services:
   database:
     image: postgres:16-alpine
     container_name: eventos-database
-
     restart: unless-stopped
 
     environment:
@@ -33,7 +32,6 @@ services:
       dockerfile: Dockerfile.backend
 
     container_name: eventos-backend
-
     restart: unless-stopped
 
     env_file:
@@ -53,7 +51,27 @@ services:
         condition: service_healthy
 
     networks:
+      - frontend-network
       - backend-network
+
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+
+    container_name: eventos-frontend
+    restart: unless-stopped
+
+    ports:
+      - "3000:80"
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    networks:
+      - frontend-network
 
 
 volumes:
@@ -62,5 +80,8 @@ volumes:
 
 
 networks:
+  frontend-network:
+    name: eventos-frontend-network
+
   backend-network:
     name: eventos-backend-network

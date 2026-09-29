@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
-import { Link, useParams } from "react-router";
+import {
+  Link,
+  useParams,
+} from "react-router";
 
-import { QRCodeSVG } from "qrcode.react";
-
-import { supabase } from "../../lib/supabase";
+import {
+  QRCodeSVG,
+} from "qrcode.react";
 
 import {
   iniciarSesionSitec,
@@ -44,20 +50,48 @@ type ResultadoInscripcion = {
 };
 
 export default function RegistroEvento() {
-  const { codigoEvento } = useParams();
+  const {
+    codigoEvento,
+  } = useParams();
 
-  const [evento, setEvento] = useState<Evento | null>(null);
+  const [
+    evento,
+    setEvento,
+  ] = useState<Evento | null>(null);
 
-  const [usuario, setUsuario] = useState<UsuarioSesion | null>(null);
+  const [
+    usuario,
+    setUsuario,
+  ] = useState<UsuarioSesion | null>(
+    null
+  );
 
-  const [cargando, setCargando] = useState(true);
+  const [
+    cargando,
+    setCargando,
+  ] = useState(true);
 
-  const [registrando, setRegistrando] = useState(false);
-  const [yaRegistrado, setYaRegistrado] = useState(false);
+  const [
+    registrando,
+    setRegistrando,
+  ] = useState(false);
 
-  const [resultado, setResultado] = useState<ResultadoInscripcion | null>(null);
+  const [
+    yaRegistrado,
+    setYaRegistrado,
+  ] = useState(false);
 
-  const [error, setError] = useState("");
+  const [
+    resultado,
+    setResultado,
+  ] = useState<ResultadoInscripcion | null>(
+    null
+  );
+
+  const [
+    error,
+    setError,
+  ] = useState("");
 
   useEffect(() => {
     async function cargarPagina() {
@@ -68,24 +102,33 @@ export default function RegistroEvento() {
         /*
          * 1. CONSULTAR SESIÓN
          */
-        const sesion = await obtenerSesion();
+        const sesion =
+          await obtenerSesion();
 
         setUsuario(sesion);
+
         /*
          * COMPROBAR SI YA ESTÁ INSCRITO
          */
-        if (sesion?.tipo === "estudiante" && codigoEvento) {
+        if (
+          sesion?.tipo === "estudiante" &&
+          codigoEvento
+        ) {
           try {
-            const respuestaInscripciones = await fetch(
-              "/api/eventos/mis-eventos",
-              {
-                method: "GET",
-                credentials: "include",
-              },
-            );
+            const respuestaInscripciones =
+              await fetch(
+                "/api/eventos/mis-eventos",
+                {
+                  method: "GET",
+                  credentials: "include",
+                }
+              );
 
-            if (respuestaInscripciones.ok) {
-              const datosInscripciones = await respuestaInscripciones.json();
+            if (
+              respuestaInscripciones.ok
+            ) {
+              const datosInscripciones =
+                await respuestaInscripciones.json();
 
               const existe =
                 datosInscripciones.eventos?.some(
@@ -93,64 +136,85 @@ export default function RegistroEvento() {
                     evento: {
                       codigo_evento: string;
                     };
-                  }) => inscripcion.evento.codigo_evento === codigoEvento,
+                  }) =>
+                    inscripcion.evento
+                      .codigo_evento ===
+                    codigoEvento
                 ) ?? false;
 
-              setYaRegistrado(existe);
+              setYaRegistrado(
+                existe
+              );
             }
           } catch (error) {
-            console.error("Error comprobando inscripción:", error);
+            console.error(
+              "Error comprobando inscripción:",
+              error
+            );
           }
         }
+
         /*
          * 2. VALIDAR CÓDIGO
          */
         if (!codigoEvento) {
-          setError("No se recibió un código de evento válido.");
+          setError(
+            "No se recibió un código de evento válido."
+          );
 
           return;
         }
 
         /*
          * 3. CONSULTAR EVENTO
+         *
+         * La consulta ahora se realiza
+         * mediante nuestro backend y
+         * PostgreSQL.
          */
-        const { data, error: errorEvento } = await supabase
-          .from("eventos")
-          .select(
-            `
-            id,
-            codigo_evento,
-            nombre,
-            descripcion,
-            fecha_evento,
-            hora_evento,
-            estado,
-            fecha_activacion,
-            cierre_inscripcion
-          `,
-          )
-          .eq("codigo_evento", codigoEvento)
-          .maybeSingle();
+        const respuestaEvento =
+          await fetch(
+            `/api/eventos/publico?codigoEvento=${encodeURIComponent(
+              codigoEvento
+            )}`,
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          );
 
-        if (errorEvento) {
-          console.error(errorEvento);
+        const datosEvento =
+          await respuestaEvento.json();
 
-          setError("No se pudo consultar el evento.");
+        if (!respuestaEvento.ok) {
+          setError(
+            datosEvento.error ??
+              "No se pudo consultar el evento."
+          );
 
           return;
         }
 
-        if (!data) {
-          setError("El evento no existe o ya no está disponible.");
+        if (!datosEvento.evento) {
+          setError(
+            "El evento no existe o ya no está disponible."
+          );
 
           return;
         }
 
-        setEvento(data);
+        setEvento(
+          datosEvento.evento
+        );
       } catch (error) {
-        console.error("Error cargando evento:", error);
+        console.error(
+          "Error cargando evento:",
+          error
+        );
 
-        setError("Ocurrió un error al cargar el evento.");
+        setError(
+          "Ocurrió un error al cargar el evento."
+        );
       } finally {
         setCargando(false);
       }
@@ -168,46 +232,77 @@ export default function RegistroEvento() {
       setRegistrando(true);
       setError("");
 
-      const respuesta = await fetch("/api/eventos/inscribirse", {
-        method: "POST",
+      const respuesta =
+        await fetch(
+          "/api/eventos/inscribirse",
+          {
+            method: "POST",
 
-        credentials: "include",
+            credentials: "include",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-        body: JSON.stringify({
-          codigoEvento,
-        }),
-      });
+            body: JSON.stringify({
+              codigoEvento,
+            }),
+          }
+        );
 
-      const datos = await respuesta.json();
+      const datos =
+        await respuesta.json();
 
       if (!respuesta.ok) {
-        setError(datos.error ?? "No se pudo realizar la inscripción.");
+        setError(
+          datos.error ??
+            "No se pudo realizar la inscripción."
+        );
 
         return;
       }
 
-      setResultado(datos);
-    } catch (error) {
-      console.error("Error inscribiendo:", error);
+      setResultado(
+        datos
+      );
 
-      setError("Ocurrió un error al realizar la inscripción.");
+      setYaRegistrado(
+        true
+      );
+    } catch (error) {
+      console.error(
+        "Error inscribiendo:",
+        error
+      );
+
+      setError(
+        "Ocurrió un error al realizar la inscripción."
+      );
     } finally {
       setRegistrando(false);
     }
   }
 
-  function formatearFecha(fecha: string) {
-    const [year, month, day] = fecha.split("-");
+  function formatearFecha(
+    fecha: string
+  ) {
+    const [
+      year,
+      month,
+      day,
+    ] = fecha.split("-");
 
     return `${day}/${month}/${year}`;
   }
 
-  function formatearHora(hora: string) {
-    return hora.slice(0, 5);
+  function formatearHora(
+    hora: string
+  ) {
+    return hora.slice(
+      0,
+      5
+    );
   }
 
   /*
@@ -216,7 +311,9 @@ export default function RegistroEvento() {
   if (cargando) {
     return (
       <main className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <p className="text-slate-500">Cargando evento...</p>
+        <p className="text-slate-500">
+          Cargando evento...
+        </p>
       </main>
     );
   }
@@ -227,12 +324,16 @@ export default function RegistroEvento() {
   if (!evento) {
     return (
       <main className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+
         <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm text-center">
+
           <h1 className="text-xl font-bold text-slate-800">
             Evento no disponible
           </h1>
 
-          <p className="mt-3 text-slate-500">{error}</p>
+          <p className="mt-3 text-slate-500">
+            {error}
+          </p>
 
           <Link
             to="/"
@@ -240,7 +341,9 @@ export default function RegistroEvento() {
           >
             Volver al inicio
           </Link>
+
         </div>
+
       </main>
     );
   }
@@ -251,9 +354,13 @@ export default function RegistroEvento() {
   if (resultado) {
     return (
       <main className="min-h-screen bg-slate-100">
+
         <div className="mx-auto max-w-2xl px-4 py-10">
+
           <div className="rounded-3xl bg-white p-8 shadow-sm">
+
             <div className="text-center">
+
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-2xl">
                 ✓
               </div>
@@ -264,17 +371,31 @@ export default function RegistroEvento() {
                   : "Inscripción realizada"}
               </h1>
 
-              <p className="mt-2 text-slate-500">{resultado.evento.nombre}</p>
+              <p className="mt-2 text-slate-500">
+                {
+                  resultado.evento
+                    .nombre
+                }
+              </p>
+
             </div>
 
             <div className="mt-8 flex justify-center">
+
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
+
                 <QRCodeSVG
-                  value={resultado.inscripcion.tokenQr}
+                  value={
+                    resultado
+                      .inscripcion
+                      .tokenQr
+                  }
                   size={230}
                   level="H"
                 />
+
               </div>
+
             </div>
 
             <p className="mt-5 text-center text-sm text-slate-500">
@@ -288,6 +409,7 @@ export default function RegistroEvento() {
             )}
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
+
               <Link
                 to="/mis-eventos"
                 className="rounded-xl bg-[#1B396A] px-5 py-3 text-center font-semibold text-white hover:opacity-90"
@@ -301,16 +423,22 @@ export default function RegistroEvento() {
               >
                 Ver más eventos
               </Link>
+
             </div>
+
           </div>
+
         </div>
+
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-slate-100">
+
       <div className="mx-auto max-w-2xl px-4 py-10">
+
         <Link
           to="/"
           className="text-sm font-medium text-[#1B396A] hover:opacity-80"
@@ -319,39 +447,57 @@ export default function RegistroEvento() {
         </Link>
 
         <div className="mt-5 overflow-hidden rounded-3xl bg-white shadow-sm">
+
           <div className="bg-[#1B396A] p-8 text-white">
+
             <p className="text-sm font-medium text-white/80">
               {evento.codigo_evento}
             </p>
 
-            <h1 className="mt-2 text-3xl font-bold">{evento.nombre}</h1>
+            <h1 className="mt-2 text-3xl font-bold">
+              {evento.nombre}
+            </h1>
+
           </div>
 
           <div className="p-8">
+
             {evento.descripcion && (
-              <p className="text-slate-600">{evento.descripcion}</p>
+              <p className="text-slate-600">
+                {evento.descripcion}
+              </p>
             )}
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
+
               <div className="rounded-xl bg-slate-50 p-4">
+
                 <p className="text-xs font-semibold uppercase text-slate-400">
                   Fecha
                 </p>
 
                 <p className="mt-1 font-semibold text-slate-800">
-                  {formatearFecha(evento.fecha_evento)}
+                  {formatearFecha(
+                    evento.fecha_evento
+                  )}
                 </p>
+
               </div>
 
               <div className="rounded-xl bg-slate-50 p-4">
+
                 <p className="text-xs font-semibold uppercase text-slate-400">
                   Hora
                 </p>
 
                 <p className="mt-1 font-semibold text-slate-800">
-                  {formatearHora(evento.hora_evento)}
+                  {formatearHora(
+                    evento.hora_evento
+                  )}
                 </p>
+
               </div>
+
             </div>
 
             {error && (
@@ -361,10 +507,11 @@ export default function RegistroEvento() {
             )}
 
             {/*
-              SIN SESIÓN
-            */}
+             * SIN SESIÓN
+             */}
             {!usuario && (
               <div className="mt-8 rounded-2xl border border-slate-200 p-6 text-center">
+
                 <h2 className="text-lg font-bold text-slate-800">
                   Inicia sesión para inscribirte
                 </h2>
@@ -375,59 +522,74 @@ export default function RegistroEvento() {
 
                 <button
                   type="button"
-                  onClick={iniciarSesionSitec}
+                  onClick={
+                    iniciarSesionSitec
+                  }
                   className="mt-5 w-full rounded-xl bg-[#1B396A] px-5 py-3 font-semibold text-white transition hover:opacity-90"
                 >
                   Iniciar sesión con SITEc
                 </button>
+
               </div>
             )}
 
             {/*
-              MAESTRO
-            */}
-            {usuario?.tipo === "maestro" && (
+             * MAESTRO
+             */}
+            {usuario?.tipo ===
+              "maestro" && (
               <div className="mt-8 rounded-2xl bg-amber-50 p-6 text-center">
-                <h2 className="font-bold text-amber-900">Sesión de maestro</h2>
+
+                <h2 className="font-bold text-amber-900">
+                  Sesión de maestro
+                </h2>
 
                 <p className="mt-2 text-sm text-amber-700">
-                  Las inscripciones a eventos están disponibles únicamente para
-                  estudiantes.
+                  Las inscripciones a eventos están disponibles únicamente para estudiantes.
                 </p>
+
               </div>
             )}
 
             {/*
-              ESTUDIANTE
-            */}
-            {usuario?.tipo === "estudiante" && (
+             * ESTUDIANTE
+             */}
+            {usuario?.tipo ===
+              "estudiante" && (
               <div className="mt-8">
+
                 <div className="rounded-xl bg-[#EEF2F7] p-4">
+
                   <p className="text-sm text-[#1B396A]">
-                    Estás identificado con tu cuenta de SITEc. Tus datos se
-                    obtendrán automáticamente.
+                    Estás identificado con tu cuenta de SITEc. Tus datos se obtendrán automáticamente.
                   </p>
+
                 </div>
 
                 <button
                   type="button"
-                  onClick={inscribirme}
-                  disabled={registrando || yaRegistrado}
+                  onClick={
+                    inscribirme
+                  }
+                  disabled={
+                    registrando ||
+                    yaRegistrado
+                  }
                   className={`
-    mt-5
-    w-full
-    rounded-xl
-    px-5
-    py-3.5
-    font-semibold
-    text-white
-    transition
-    ${
-      yaRegistrado
-        ? "cursor-not-allowed bg-green-600"
-        : "bg-[#1B396A] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-    }
-  `}
+                    mt-5
+                    w-full
+                    rounded-xl
+                    px-5
+                    py-3.5
+                    font-semibold
+                    text-white
+                    transition
+                    ${
+                      yaRegistrado
+                        ? "cursor-not-allowed bg-green-600"
+                        : "bg-[#1B396A] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                    }
+                  `}
                 >
                   {yaRegistrado
                     ? "Registrado"
@@ -435,6 +597,7 @@ export default function RegistroEvento() {
                       ? "Registrando..."
                       : "Inscribirme al evento"}
                 </button>
+
                 {yaRegistrado && (
                   <Link
                     to="/mis-eventos"
@@ -443,11 +606,16 @@ export default function RegistroEvento() {
                     Ver mi código QR
                   </Link>
                 )}
+
               </div>
             )}
+
           </div>
+
         </div>
+
       </div>
+
     </main>
   );
 }

@@ -176,7 +176,7 @@ export default function ModalNuevoEvento({ abierto, cerrar, alCrear }: Props) {
     try {
       /*
        * YA NO INSERTAMOS DIRECTAMENTE
-       * EN SUPABASE.
+       * EN EL BACKEND.
        *
        * TODO PASA POR EL BACKEND.
        */

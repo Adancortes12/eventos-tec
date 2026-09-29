@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { db } from "../lib/db.js";
 
 import {
   obtenerCookie,
@@ -13,8 +13,7 @@ function obtenerFechaActualLocal() {
   return new Intl.DateTimeFormat(
     "en-CA",
     {
-      timeZone:
-        "America/Mexico_City",
+      timeZone: "America/Mexico_City",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -47,38 +46,21 @@ function horaValida(hora) {
  * EVT-2026-0002
  * ...
  */
-async function generarCodigoEvento(
-  anio
-) {
-  const {
-    data: ultimoEvento,
-    error,
-  } = await supabaseAdmin
-    .from("eventos")
-    .select("codigo_evento")
-    .like(
-      "codigo_evento",
-      `EVT-${anio}-%`
-    )
-    .order(
-      "codigo_evento",
-      {
-        ascending: false,
-      }
-    )
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    console.error(
-      "Error generando código:",
-      error
+async function generarCodigoEvento(anio) {
+  const resultado =
+    await db.query(
+      `
+        SELECT codigo_evento
+        FROM eventos
+        WHERE codigo_evento LIKE $1
+        ORDER BY codigo_evento DESC
+        LIMIT 1
+      `,
+      [`EVT-${anio}-%`]
     );
 
-    throw new Error(
-      "No se pudo generar el código del evento."
-    );
-  }
+  const ultimoEvento =
+    resultado.rows[0];
 
   let siguienteNumero = 1;
 
@@ -146,36 +128,25 @@ export default async function handler(
     }
 
     /*
-     * 2. CONSULTAR MAESTRO
+     * 2. CONSULTAR USUARIO
      * Y SU ROL ACTUAL
      */
-    const {
-      data: maestro,
-      error: errorMaestro,
-    } = await supabaseAdmin
-      .from("maestros")
-      .select(`
-        id,
-        rol_sistema,
-        activo
-      `)
-      .eq(
-        "id",
-        sesion.id
-      )
-      .maybeSingle();
-
-    if (errorMaestro) {
-      console.error(
-        "Error consultando maestro:",
-        errorMaestro
+    const resultadoMaestro =
+      await db.query(
+        `
+          SELECT
+            id,
+            rol_sistema,
+            activo
+          FROM maestros
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [sesion.id]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo verificar el usuario.",
-      });
-    }
+    const maestro =
+      resultadoMaestro.rows[0];
 
     if (
       !maestro ||
@@ -188,18 +159,15 @@ export default async function handler(
     }
 
     /*
-     * SOLO ADMIN Y SUPERADMIN
+     * SOLO SUPERADMIN
      */
-    const puedeCrear =
-      maestro.rol_sistema ===
-        "admin" ||
-      maestro.rol_sistema ===
-        "superadmin";
-
-    if (!puedeCrear) {
+    if (
+      maestro.rol_sistema !==
+      "superadmin"
+    ) {
       return res.status(403).json({
         error:
-          "No tienes permisos para crear eventos.",
+          "Solo un superadministrador puede crear eventos.",
       });
     }
 
@@ -219,8 +187,7 @@ export default async function handler(
      * 4. VALIDACIONES
      */
     if (
-      typeof nombre !==
-        "string" ||
+      typeof nombre !== "string" ||
       !nombre.trim()
     ) {
       return res.status(400).json({
@@ -230,8 +197,7 @@ export default async function handler(
     }
 
     if (
-      typeof fechaEvento !==
-        "string" ||
+      typeof fechaEvento !== "string" ||
       !fechaValida(fechaEvento)
     ) {
       return res.status(400).json({
@@ -241,8 +207,7 @@ export default async function handler(
     }
 
     if (
-      typeof horaEvento !==
-        "string" ||
+      typeof horaEvento !== "string" ||
       !horaValida(horaEvento)
     ) {
       return res.status(400).json({
@@ -252,8 +217,7 @@ export default async function handler(
     }
 
     if (
-      typeof fechaActivacion !==
-        "string" ||
+      typeof fechaActivacion !== "string" ||
       !fechaActivacion
     ) {
       return res.status(400).json({
@@ -266,9 +230,7 @@ export default async function handler(
       Number(duracionMinutos);
 
     if (
-      !Number.isInteger(
-        duracion
-      ) ||
+      !Number.isInteger(duracion) ||
       duracion <= 0 ||
       duracion > 1440
     ) {
@@ -285,9 +247,7 @@ export default async function handler(
     const hoy =
       obtenerFechaActualLocal();
 
-    if (
-      fechaEvento < hoy
-    ) {
+    if (fechaEvento < hoy) {
       return res.status(400).json({
         error:
           "No puedes crear un evento con una fecha anterior a hoy.",
@@ -316,16 +276,13 @@ export default async function handler(
      */
     const anio =
       Number(
-        fechaEvento.slice(
-          0,
-          4
-        )
+        fechaEvento.slice(0, 4)
       );
 
     /*
-     * Hacemos algunos intentos
-     * por si dos administradores
-     * crean al mismo tiempo.
+     * HACEMOS HASTA 3 INTENTOS
+     * POR SI DOS SUPERADMINISTRADORES
+     * CREAN AL MISMO TIEMPO.
      */
     for (
       let intento = 0;
@@ -337,73 +294,90 @@ export default async function handler(
           anio
         );
 
-      /*
-       * 6. CREAR EVENTO
-       */
-      const {
-        data: evento,
-        error: errorCreacion,
-      } = await supabaseAdmin
-        .from("eventos")
-        .insert({
-          codigo_evento:
-            codigoEvento,
+      try {
+        /*
+         * 6. CREAR EVENTO
+         */
+        const resultadoCreacion =
+          await db.query(
+            `
+              INSERT INTO eventos (
+                codigo_evento,
+                nombre,
+                descripcion,
+                fecha_evento,
+                hora_evento,
+                estado,
+                fecha_activacion,
+                duracion_minutos,
+                creado_por
+              )
+              VALUES (
+                $1,
+                $2,
+                $3,
+                $4,
+                $5,
+                'activo',
+                $6,
+                $7,
+                $8
+              )
+              RETURNING
+                id,
+                codigo_evento,
+                nombre,
+                descripcion,
+                fecha_evento,
+                hora_evento,
+                estado,
+                fecha_activacion,
+                duracion_minutos,
+                cierre_inscripcion,
+                creado_por
+            `,
+            [
+              codigoEvento,
+              nombre.trim(),
+              typeof descripcion ===
+                "string" &&
+              descripcion.trim()
+                ? descripcion.trim()
+                : null,
+              fechaEvento,
+              horaEvento,
+              fechaActivacion,
+              duracion,
+              maestro.id,
+            ]
+          );
 
-          nombre:
-            nombre.trim(),
+        const evento =
+          resultadoCreacion.rows[0];
 
-          descripcion:
-            typeof descripcion ===
-              "string" &&
-            descripcion.trim()
-              ? descripcion.trim()
-              : null,
+        /*
+         * 7. RESPUESTA
+         */
+        return res.status(201).json({
+          creado: true,
+          evento,
+        });
+      } catch (errorCreacion) {
+        /*
+         * 23505 = UNIQUE VIOLATION
+         *
+         * Si otro superadministrador
+         * generó el mismo código al
+         * mismo tiempo, volvemos a
+         * intentarlo.
+         */
+        if (
+          errorCreacion.code ===
+          "23505"
+        ) {
+          continue;
+        }
 
-          fecha_evento:
-            fechaEvento,
-
-          hora_evento:
-            horaEvento,
-
-          estado:
-            "activo",
-
-          fecha_activacion:
-            fechaActivacion,
-
-          duracion_minutos:
-            duracion,
-
-          creado_por:
-            maestro.id,
-        })
-        .select(`
-          id,
-          codigo_evento,
-          nombre,
-          descripcion,
-          fecha_evento,
-          hora_evento,
-          estado,
-          fecha_activacion,
-          duracion_minutos,
-          cierre_inscripcion,
-          creado_por
-        `)
-        .single();
-
-      /*
-       * CÓDIGO DUPLICADO:
-       * INTENTAMOS DE NUEVO
-       */
-      if (
-        errorCreacion?.code ===
-        "23505"
-      ) {
-        continue;
-      }
-
-      if (errorCreacion) {
         console.error(
           "Error creando evento:",
           errorCreacion
@@ -414,14 +388,6 @@ export default async function handler(
             "No se pudo crear el evento.",
         });
       }
-
-      /*
-       * 7. RESPUESTA
-       */
-      return res.status(201).json({
-        creado: true,
-        evento,
-      });
     }
 
     return res.status(409).json({
@@ -440,4 +406,3 @@ export default async function handler(
     });
   }
 }
-

@@ -1,5 +1,5 @@
 import express from "express";
-
+import dashboard from "./server/eventos/dashboard.js";
 import { db } from "./server/lib/db.js";
 import crear from "./server/eventos/crear.js";
 import editar from "./server/eventos/editar.js";
@@ -8,11 +8,11 @@ import finalizar from "./server/eventos/finalizar.js";
 import inscribirse from "./server/eventos/inscribirse.js";
 import misEventos from "./server/eventos/mis-eventos.js";
 import detalle from "./server/eventos/detalle.js";
-
+import listar from "./server/eventos/listar.js";
 import maestros from "./server/admin/maestros.js";
-
+import disponibles from "./server/eventos/disponibles.js";
 import registrarAsistencia from "./api/asistencia/registrar.js";
-
+import publico from "./server/eventos/publico.js";
 import sitecLogin from "./api/sitec/login.js";
 import sitecCallback from "./api/sitec/callback.js";
 import sitecLogout from "./api/sitec/logout.js";
@@ -46,6 +46,10 @@ const accionesEventos = {
   inscribirse,
   "mis-eventos": misEventos,
   detalle,
+  disponibles,
+  publico,
+  listar,
+  dashboard,
 };
 
 app.all(

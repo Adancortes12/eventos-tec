@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { db } from "../lib/db.js";
 
 import {
   obtenerCookie,
@@ -34,30 +34,22 @@ export default async function handler(req, res) {
     }
 
     // 2. Verificar maestro activo
-    const {
-      data: maestro,
-      error: errorMaestro,
-    } = await supabaseAdmin
-      .from("maestros")
-      .select(`
-        id,
-        rol_sistema,
-        activo
-      `)
-      .eq("id", sesion.id)
-      .maybeSingle();
-
-    if (errorMaestro) {
-      console.error(
-        "Error consultando maestro:",
-        errorMaestro
+    const resultadoMaestro =
+      await db.query(
+        `
+          SELECT
+            id,
+            rol_sistema,
+            activo
+          FROM maestros
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [sesion.id]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo verificar el usuario.",
-      });
-    }
+    const maestro =
+      resultadoMaestro.rows[0];
 
     if (
       !maestro ||
@@ -83,37 +75,29 @@ export default async function handler(req, res) {
     }
 
     // 3. Obtener evento
-    const {
-      data: evento,
-      error: errorEvento,
-    } = await supabaseAdmin
-      .from("eventos")
-      .select(`
-        id,
-        codigo_evento,
-        nombre,
-        descripcion,
-        fecha_evento,
-        hora_evento,
-        estado,
-        fecha_activacion,
-        duracion_minutos,
-        cierre_inscripcion
-      `)
-      .eq("id", eventoId)
-      .maybeSingle();
-
-    if (errorEvento) {
-      console.error(
-        "Error consultando evento:",
-        errorEvento
+    const resultadoEvento =
+      await db.query(
+        `
+          SELECT
+            id,
+            codigo_evento,
+            nombre,
+            descripcion,
+            fecha_evento,
+            hora_evento,
+            estado,
+            fecha_activacion,
+            duracion_minutos,
+            cierre_inscripcion
+          FROM eventos
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo cargar el evento.",
-      });
-    }
+    const evento =
+      resultadoEvento.rows[0];
 
     if (!evento) {
       return res.status(404).json({
@@ -123,40 +107,29 @@ export default async function handler(req, res) {
     }
 
     // 4. Obtener inscritos
-    const {
-      data: inscripciones,
-      error: errorInscripciones,
-    } = await supabaseAdmin
-      .from("inscripciones")
-      .select(`
-        id,
-        numero_estudiante,
-        nombre_completo,
-        registrado_en,
-        asistio,
-        asistio_en
-      `)
-      .eq("evento_id", eventoId)
-      .order("registrado_en", {
-        ascending: false,
-      });
-
-    if (errorInscripciones) {
-      console.error(
-        "Error consultando inscripciones:",
-        errorInscripciones
+    const resultadoInscripciones =
+      await db.query(
+        `
+          SELECT
+            id,
+            numero_estudiante,
+            nombre_completo,
+            registrado_en,
+            asistio,
+            asistio_en
+          FROM inscripciones
+          WHERE evento_id = $1
+          ORDER BY registrado_en DESC
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudieron cargar las inscripciones.",
-      });
-    }
+    const inscripciones =
+      resultadoInscripciones.rows;
 
     return res.status(200).json({
       evento,
-      inscripciones:
-        inscripciones ?? [],
+      inscripciones,
     });
   } catch (error) {
     console.error(

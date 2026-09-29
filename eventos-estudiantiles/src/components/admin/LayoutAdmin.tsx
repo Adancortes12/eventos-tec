@@ -26,6 +26,8 @@ export type ContextoAdmin = {
   rol: "maestro" | "admin" | "superadmin";
 
   puedeCrearEventos: boolean;
+
+  puedeGestionarEventos: boolean;
 };
 
 export default function LayoutAdmin() {
@@ -89,7 +91,9 @@ export default function LayoutAdmin() {
   /*
    * PERMISOS
    */
-  const puedeCrearEventos =
+  const puedeCrearEventos = usuario?.rol === "superadmin";
+
+  const puedeGestionarEventos =
     usuario?.rol === "admin" || usuario?.rol === "superadmin";
 
   const puedeVerDashboard = true;
@@ -366,6 +370,7 @@ export default function LayoutAdmin() {
                 abrirModalNuevoEvento,
                 rol: usuario.rol,
                 puedeCrearEventos,
+                puedeGestionarEventos,
               }}
             />
           </div>

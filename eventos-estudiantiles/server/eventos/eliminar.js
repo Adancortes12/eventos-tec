@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { db } from "../lib/db.js";
 
 import {
   obtenerCookie,
@@ -34,30 +34,22 @@ export default async function handler(req, res) {
     }
 
     // 2. Consultar rol actual
-    const {
-      data: maestro,
-      error: errorMaestro,
-    } = await supabaseAdmin
-      .from("maestros")
-      .select(`
-        id,
-        rol_sistema,
-        activo
-      `)
-      .eq("id", sesion.id)
-      .maybeSingle();
-
-    if (errorMaestro) {
-      console.error(
-        "Error consultando maestro:",
-        errorMaestro
+    const resultadoMaestro =
+      await db.query(
+        `
+          SELECT
+            id,
+            rol_sistema,
+            activo
+          FROM maestros
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [sesion.id]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo verificar el usuario.",
-      });
-    }
+    const maestro =
+      resultadoMaestro.rows[0];
 
     if (
       !maestro ||
@@ -72,8 +64,7 @@ export default async function handler(req, res) {
     // 3. Solo admin y superadmin
     const puedeEliminar =
       maestro.rol_sistema === "admin" ||
-      maestro.rol_sistema ===
-        "superadmin";
+      maestro.rol_sistema === "superadmin";
 
     if (!puedeEliminar) {
       return res.status(403).json({
@@ -97,30 +88,22 @@ export default async function handler(req, res) {
     }
 
     // 5. Comprobar que exista
-    const {
-      data: evento,
-      error: errorEvento,
-    } = await supabaseAdmin
-      .from("eventos")
-      .select(`
-        id,
-        codigo_evento,
-        nombre
-      `)
-      .eq("id", eventoId)
-      .maybeSingle();
-
-    if (errorEvento) {
-      console.error(
-        "Error consultando evento:",
-        errorEvento
+    const resultadoEvento =
+      await db.query(
+        `
+          SELECT
+            id,
+            codigo_evento,
+            nombre
+          FROM eventos
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo consultar el evento.",
-      });
-    }
+    const evento =
+      resultadoEvento.rows[0];
 
     if (!evento) {
       return res.status(404).json({
@@ -130,53 +113,41 @@ export default async function handler(req, res) {
     }
 
     // 6. Revisar inscripciones
-    const {
-      count,
-      error: errorInscripciones,
-    } = await supabaseAdmin
-      .from("inscripciones")
-      .select("id", {
-        count: "exact",
-        head: true,
-      })
-      .eq("evento_id", eventoId);
-
-    if (errorInscripciones) {
-      console.error(
-        "Error consultando inscripciones:",
-        errorInscripciones
+    const resultadoInscripciones =
+      await db.query(
+        `
+          SELECT COUNT(*)::int AS total
+          FROM inscripciones
+          WHERE evento_id = $1
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo verificar si el evento tiene inscripciones.",
-      });
-    }
+    const totalInscripciones =
+      resultadoInscripciones.rows[0]?.total ?? 0;
 
-    if ((count ?? 0) > 0) {
+    if (totalInscripciones > 0) {
       return res.status(409).json({
         error:
           "No puedes eliminar un evento que ya tiene estudiantes registrados.",
       });
     }
 
-    // 7. Eliminar
-    const {
-      error: errorEliminar,
-    } = await supabaseAdmin
-      .from("eventos")
-      .delete()
-      .eq("id", eventoId);
-
-    if (errorEliminar) {
-      console.error(
-        "Error eliminando evento:",
-        errorEliminar
+    // 7. Eliminar evento
+    const resultadoEliminar =
+      await db.query(
+        `
+          DELETE FROM eventos
+          WHERE id = $1
+          RETURNING id
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
+    if (resultadoEliminar.rowCount === 0) {
+      return res.status(404).json({
         error:
-          "No se pudo eliminar el evento.",
+          "El evento no existe.",
       });
     }
 
@@ -195,4 +166,3 @@ export default async function handler(req, res) {
     });
   }
 }
-

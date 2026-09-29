@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { db } from "../lib/db.js";
 
 import {
   obtenerCookie,
@@ -33,31 +33,23 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2. Consultar rol actual
-    const {
-      data: maestro,
-      error: errorMaestro,
-    } = await supabaseAdmin
-      .from("maestros")
-      .select(`
-        id,
-        rol_sistema,
-        activo
-      `)
-      .eq("id", sesion.id)
-      .maybeSingle();
-
-    if (errorMaestro) {
-      console.error(
-        "Error consultando maestro:",
-        errorMaestro
+    // 2. Consultar maestro directamente en PostgreSQL
+    const resultadoMaestro =
+      await db.query(
+        `
+          SELECT
+            id,
+            rol_sistema,
+            activo
+          FROM maestros
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [sesion.id]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo verificar el usuario.",
-      });
-    }
+    const maestro =
+      resultadoMaestro.rows[0];
 
     if (
       !maestro ||
@@ -72,8 +64,7 @@ export default async function handler(req, res) {
     // 3. Solo admin y superadmin
     const puedeFinalizar =
       maestro.rol_sistema === "admin" ||
-      maestro.rol_sistema ===
-        "superadmin";
+      maestro.rol_sistema === "superadmin";
 
     if (!puedeFinalizar) {
       return res.status(403).json({
@@ -82,9 +73,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // 4. Obtener evento
-    const { eventoId } =
-      req.body ?? {};
+    // 4. Validar evento
+    const { eventoId } = req.body ?? {};
 
     if (
       typeof eventoId !== "string" ||
@@ -96,31 +86,24 @@ export default async function handler(req, res) {
       });
     }
 
-    const {
-      data: eventoActual,
-      error: errorEvento,
-    } = await supabaseAdmin
-      .from("eventos")
-      .select(`
-        id,
-        codigo_evento,
-        nombre,
-        estado
-      `)
-      .eq("id", eventoId)
-      .maybeSingle();
-
-    if (errorEvento) {
-      console.error(
-        "Error consultando evento:",
-        errorEvento
+    // 5. Consultar evento
+    const resultadoEvento =
+      await db.query(
+        `
+          SELECT
+            id,
+            codigo_evento,
+            nombre,
+            estado
+          FROM eventos
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo consultar el evento.",
-      });
-    }
+    const eventoActual =
+      resultadoEvento.rows[0];
 
     if (!eventoActual) {
       return res.status(404).json({
@@ -139,35 +122,24 @@ export default async function handler(req, res) {
       });
     }
 
-    // 5. Finalizar
-    const {
-      data: evento,
-      error: errorActualizacion,
-    } = await supabaseAdmin
-      .from("eventos")
-      .update({
-        estado: "finalizado",
-      })
-      .eq("id", eventoId)
-      .select(`
-        id,
-        codigo_evento,
-        nombre,
-        estado
-      `)
-      .single();
-
-    if (errorActualizacion) {
-      console.error(
-        "Error finalizando evento:",
-        errorActualizacion
+    // 6. Finalizar evento
+    const resultadoActualizacion =
+      await db.query(
+        `
+          UPDATE eventos
+          SET estado = 'finalizado'
+          WHERE id = $1
+          RETURNING
+            id,
+            codigo_evento,
+            nombre,
+            estado
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo finalizar el evento.",
-      });
-    }
+    const evento =
+      resultadoActualizacion.rows[0];
 
     return res.status(200).json({
       finalizado: true,
@@ -185,4 +157,3 @@ export default async function handler(req, res) {
     });
   }
 }
-

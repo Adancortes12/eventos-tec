@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import {
   Link,
   useOutletContext,
 } from "react-router";
-
-import { supabase } from "../../lib/supabase";
 
 type Evento = {
   id: string;
@@ -34,54 +37,95 @@ type FiltroEstado =
   | "finalizado";
 
 export default function Eventos() {
-    
   const {
-  abrirModalNuevoEvento,
-  puedeCrearEventos,
-  } = useOutletContext<ContextoAdmin>();
+    abrirModalNuevoEvento,
+    puedeCrearEventos,
+  } =
+    useOutletContext<ContextoAdmin>();
 
-  const [eventos, setEventos] =
-    useState<Evento[]>([]);
+  const [
+    eventos,
+    setEventos,
+  ] = useState<Evento[]>([]);
 
-  const [busqueda, setBusqueda] =
-    useState("");
+  const [
+    busqueda,
+    setBusqueda,
+  ] = useState("");
 
-  const [filtroEstado, setFiltroEstado] =
-    useState<FiltroEstado>("todos");
+  const [
+    filtroEstado,
+    setFiltroEstado,
+  ] =
+    useState<FiltroEstado>(
+      "todos"
+    );
 
-  const [cargando, setCargando] =
-    useState(true);
+  const [
+    cargando,
+    setCargando,
+  ] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [
+    error,
+    setError,
+  ] = useState("");
 
   useEffect(() => {
-    const cargarEventos = async () => {
-      setCargando(true);
-      setError("");
+    const cargarEventos =
+      async () => {
+        try {
+          setCargando(true);
+          setError("");
 
-      const { data, error } =
-        await supabase
-          .from("eventos")
-          .select("*")
-          .order("fecha_evento", {
-            ascending: true,
-          });
+          /*
+           * Los eventos ahora se
+           * obtienen desde nuestro
+           * backend con PostgreSQL.
+           */
+          const respuesta =
+            await fetch(
+              "/api/eventos/listar",
+              {
+                method: "GET",
+                credentials:
+                  "include",
+              }
+            );
 
-      if (error) {
-        console.error(error);
+          const datos =
+            await respuesta.json();
 
-        setError(
-          "No se pudieron cargar los eventos."
-        );
+          if (!respuesta.ok) {
+            console.error(
+              "Error cargando eventos:",
+              datos
+            );
 
-        setCargando(false);
-        return;
-      }
+            setError(
+              datos.error ??
+                "No se pudieron cargar los eventos."
+            );
 
-      setEventos(data ?? []);
-      setCargando(false);
-    };
+            return;
+          }
+
+          setEventos(
+            datos.eventos ?? []
+          );
+        } catch (error) {
+          console.error(
+            "Error cargando eventos:",
+            error
+          );
+
+          setError(
+            "No se pudieron cargar los eventos."
+          );
+        } finally {
+          setCargando(false);
+        }
+      };
 
     cargarEventos();
   }, []);
@@ -96,7 +140,8 @@ export default function Eventos() {
       return eventos.filter(
         (evento) => {
           const coincideEstado =
-            filtroEstado === "todos" ||
+            filtroEstado ===
+              "todos" ||
             evento.estado ===
               filtroEstado;
 
@@ -124,7 +169,8 @@ export default function Eventos() {
   const totalActivos =
     eventos.filter(
       (evento) =>
-        evento.estado === "activo"
+        evento.estado ===
+        "activo"
     ).length;
 
   const totalFinalizados =
@@ -136,9 +182,12 @@ export default function Eventos() {
 
   return (
     <div>
+
       {/* Encabezado */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
         <div>
+
           <p className="text-sm font-semibold text-[#1B396A]">
             Administración
           </p>
@@ -148,28 +197,32 @@ export default function Eventos() {
           </h1>
 
           <p className="mt-2 text-gray-600">
-  {puedeCrearEventos
-    ? "Consulta y administra los eventos registrados."
-    : "Consulta los eventos y registra asistencias."}
-</p>
+            {puedeCrearEventos
+              ? "Consulta y administra los eventos registrados."
+              : "Consulta los eventos y registra asistencias."}
+          </p>
+
         </div>
 
         {puedeCrearEventos && (
-  <button
-    type="button"
-    onClick={
-      abrirModalNuevoEvento
-    }
-    className="w-fit rounded-xl bg-[#1B396A] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-  >
-    + Nuevo evento
-  </button>
-)}
+          <button
+            type="button"
+            onClick={
+              abrirModalNuevoEvento
+            }
+            className="w-fit rounded-xl bg-[#1B396A] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+          >
+            + Nuevo evento
+          </button>
+        )}
+
       </div>
 
       {/* Resumen */}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
+
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
           <p className="text-sm text-gray-600">
             Total
           </p>
@@ -177,9 +230,11 @@ export default function Eventos() {
           <p className="mt-2 text-3xl font-bold text-[#1F2937]">
             {eventos.length}
           </p>
+
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
           <p className="text-sm text-gray-600">
             Activos
           </p>
@@ -187,9 +242,11 @@ export default function Eventos() {
           <p className="mt-2 text-3xl font-bold text-green-600">
             {totalActivos}
           </p>
+
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
           <p className="text-sm text-gray-600">
             Finalizados
           </p>
@@ -197,13 +254,18 @@ export default function Eventos() {
           <p className="mt-2 text-3xl font-bold text-slate-600">
             {totalFinalizados}
           </p>
+
         </div>
+
       </div>
 
       {/* Búsqueda y filtros */}
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
           <div className="w-full lg:max-w-md">
+
             <label className="sr-only">
               Buscar evento
             </label>
@@ -219,9 +281,11 @@ export default function Eventos() {
               placeholder="Buscar por nombre o código..."
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-[#1F2937] outline-none transition focus:border-[#1B396A]"
             />
+
           </div>
 
           <div className="flex flex-wrap gap-2">
+
             <button
               type="button"
               onClick={() =>
@@ -272,16 +336,21 @@ export default function Eventos() {
             >
               Finalizados
             </button>
+
           </div>
+
         </div>
+
       </div>
 
       {/* Estados */}
       {cargando && (
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+
           <p className="text-gray-600">
             Cargando eventos...
           </p>
+
         </div>
       )}
 
@@ -296,6 +365,7 @@ export default function Eventos() {
         eventosFiltrados.length ===
           0 && (
           <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+
             <h2 className="font-semibold text-slate-800">
               No se encontraron eventos
             </h2>
@@ -303,6 +373,7 @@ export default function Eventos() {
             <p className="mt-2 text-sm text-gray-600">
               Prueba otra búsqueda o cambia el filtro.
             </p>
+
           </div>
         )}
 
@@ -312,7 +383,9 @@ export default function Eventos() {
         eventosFiltrados.length >
           0 && (
           <>
+
             <div className="mt-6 flex items-center justify-between">
+
               <p className="text-sm text-gray-600">
                 Mostrando{" "}
                 {
@@ -324,18 +397,24 @@ export default function Eventos() {
                   ? "s"
                   : ""}
               </p>
+
             </div>
 
             <div className="mt-4 grid gap-4">
+
               {eventosFiltrados.map(
                 (evento) => (
                   <article
                     key={evento.id}
                     className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6"
                   >
+
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
                       <div className="min-w-0">
+
                         <div className="flex flex-wrap items-center gap-3">
+
                           <span className="text-xs font-semibold text-[#1B396A]">
                             {
                               evento.codigo_evento
@@ -355,6 +434,7 @@ export default function Eventos() {
                               ? "Activo"
                               : "Finalizado"}
                           </span>
+
                         </div>
 
                         <h2 className="mt-3 text-xl font-bold text-[#1F2937]">
@@ -372,6 +452,7 @@ export default function Eventos() {
                         )}
 
                         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">
+
                           <p>
                             <span className="font-medium text-slate-700">
                               Fecha:
@@ -389,10 +470,13 @@ export default function Eventos() {
                               evento.hora_evento
                             }
                           </p>
+
                         </div>
+
                       </div>
 
                       <div className="flex flex-wrap gap-2 lg:justify-end">
+
                         <Link
                           to={`/admin/eventos/${evento.id}`}
                           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-[#F5F5F5]"
@@ -409,14 +493,20 @@ export default function Eventos() {
                             Pasar asistencia
                           </Link>
                         )}
+
                       </div>
+
                     </div>
+
                   </article>
                 )
               )}
+
             </div>
+
           </>
         )}
+
     </div>
   );
 }

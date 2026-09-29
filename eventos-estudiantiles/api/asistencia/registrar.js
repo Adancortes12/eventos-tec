@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "../../server/lib/supabaseAdmin.js";
+import { db } from "../../server/lib/db.js";
 
 import {
   obtenerCookie,
@@ -41,30 +41,22 @@ export default async function handler(req, res) {
      * Cualquier maestro activo puede
      * pasar asistencia.
      */
-    const {
-      data: maestro,
-      error: errorMaestro,
-    } = await supabaseAdmin
-      .from("maestros")
-      .select(`
-        id,
-        rol_sistema,
-        activo
-      `)
-      .eq("id", sesion.id)
-      .maybeSingle();
-
-    if (errorMaestro) {
-      console.error(
-        "Error consultando maestro:",
-        errorMaestro
+    const resultadoMaestro =
+      await db.query(
+        `
+          SELECT
+            id,
+            rol_sistema,
+            activo
+          FROM maestros
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [sesion.id]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo verificar el usuario.",
-      });
-    }
+    const maestro =
+      resultadoMaestro.rows[0];
 
     if (
       !maestro ||
@@ -107,29 +99,21 @@ export default async function handler(req, res) {
     /*
      * 4. COMPROBAR EVENTO
      */
-    const {
-      data: evento,
-      error: errorEvento,
-    } = await supabaseAdmin
-      .from("eventos")
-      .select(`
-        id,
-        estado
-      `)
-      .eq("id", eventoId)
-      .maybeSingle();
-
-    if (errorEvento) {
-      console.error(
-        "Error consultando evento:",
-        errorEvento
+    const resultadoEvento =
+      await db.query(
+        `
+          SELECT
+            id,
+            estado
+          FROM eventos
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo consultar el evento.",
-      });
-    }
+    const evento =
+      resultadoEvento.rows[0];
 
     if (!evento) {
       return res.status(404).json({
@@ -150,39 +134,27 @@ export default async function handler(req, res) {
     }
 
     /*
-     * 5. BUSCAR INSCRIPCIÓN
+     * 5. BUSCAR INSCRIPCIÓN POR QR
      */
-    const {
-      data: inscripcion,
-      error: errorInscripcion,
-    } = await supabaseAdmin
-      .from("inscripciones")
-      .select(`
-        id,
-        evento_id,
-        numero_estudiante,
-        nombre_completo,
-        asistio,
-        asistio_en
-      `)
-      .eq(
-        "token_qr",
-        tokenQr.trim()
-      )
-      .maybeSingle();
-
-    if (errorInscripcion) {
-      console.error(
-        "Error consultando QR:",
-        errorInscripcion
+    const resultadoInscripcion =
+      await db.query(
+        `
+          SELECT
+            id,
+            evento_id,
+            numero_estudiante,
+            nombre_completo,
+            asistio,
+            asistio_en
+          FROM inscripciones
+          WHERE token_qr = $1
+          LIMIT 1
+        `,
+        [tokenQr.trim()]
       );
 
-      return res.status(500).json({
-        tipo: "error",
-        error:
-          "No se pudo consultar el QR.",
-      });
-    }
+    const inscripcion =
+      resultadoInscripcion.rows[0];
 
     /*
      * QR inexistente
@@ -230,43 +202,68 @@ export default async function handler(req, res) {
     /*
      * 6. REGISTRAR ASISTENCIA
      *
-     * La hora la genera el servidor.
+     * La condición asistio = FALSE evita
+     * registrar dos veces si llegan dos
+     * escaneos al mismo tiempo.
      */
-    const ahora =
-      new Date().toISOString();
-
-    const {
-      data: actualizada,
-      error: errorActualizar,
-    } = await supabaseAdmin
-      .from("inscripciones")
-      .update({
-        asistio: true,
-        asistio_en: ahora,
-      })
-      .eq(
-        "id",
-        inscripcion.id
-      )
-      .select(`
-        id,
-        numero_estudiante,
-        nombre_completo,
-        asistio,
-        asistio_en
-      `)
-      .single();
-
-    if (errorActualizar) {
-      console.error(
-        "Error registrando asistencia:",
-        errorActualizar
+    const resultadoActualizacion =
+      await db.query(
+        `
+          UPDATE inscripciones
+          SET
+            asistio = TRUE,
+            asistio_en = NOW()
+          WHERE id = $1
+            AND asistio = FALSE
+          RETURNING
+            id,
+            numero_estudiante,
+            nombre_completo,
+            asistio,
+            asistio_en
+        `,
+        [inscripcion.id]
       );
 
-      return res.status(500).json({
-        tipo: "error",
-        error:
-          "No se pudo registrar la asistencia.",
+    const actualizada =
+      resultadoActualizacion.rows[0];
+
+    /*
+     * Si no actualizó ninguna fila,
+     * otro escaneo pudo registrarla
+     * justo antes.
+     */
+    if (!actualizada) {
+      const resultadoActual =
+        await db.query(
+          `
+            SELECT
+              numero_estudiante,
+              nombre_completo,
+              asistio_en
+            FROM inscripciones
+            WHERE id = $1
+            LIMIT 1
+          `,
+          [inscripcion.id]
+        );
+
+      const actual =
+        resultadoActual.rows[0];
+
+      return res.status(200).json({
+        tipo: "repetido",
+
+        nombre:
+          actual?.nombre_completo ??
+          inscripcion.nombre_completo,
+
+        numero:
+          actual?.numero_estudiante ??
+          inscripcion.numero_estudiante,
+
+        asistioEn:
+          actual?.asistio_en ?? null,
       });
     }
 

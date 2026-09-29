@@ -7,8 +7,6 @@ import {
   Link,
 } from "react-router";
 
-import { supabase } from "../../lib/supabase";
-
 import {
   obtenerSesion,
 } from "../../lib/sesion";
@@ -63,67 +61,24 @@ export default function EventosDisponibles() {
         setError("");
 
         /*
-         * Hora local del navegador.
-         * Se utiliza para comparar
-         * fecha_activacion y cierre_inscripcion.
-         */
-        const ahora = new Date();
-
-        const ahoraLocal = new Date(
-          ahora.getTime() -
-          ahora.getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .slice(0, 19);
-
-        /*
          * 1. CARGAR EVENTOS DISPONIBLES
+         *
+         * La disponibilidad ahora se
+         * calcula en el backend usando
+         * PostgreSQL.
          */
-        const {
-          data: eventosData,
-          error: errorEventos,
-        } = await supabase
-          .from("eventos")
-          .select(`
-            id,
-            codigo_evento,
-            nombre,
-            descripcion,
-            fecha_evento,
-            hora_evento,
-            estado,
-            fecha_activacion,
-            cierre_inscripcion
-          `)
-          .eq(
-            "estado",
-            "activo"
-          )
-          .lte(
-            "fecha_activacion",
-            ahoraLocal
-          )
-          .gte(
-            "cierre_inscripcion",
-            ahoraLocal
-          )
-          .order(
-            "fecha_evento",
+        const respuestaEventos =
+          await fetch(
+            "/api/eventos/disponibles",
             {
-              ascending: true,
-            }
-          )
-          .order(
-            "hora_evento",
-            {
-              ascending: true,
+              method: "GET",
+              credentials: "include",
             }
           );
 
-        if (errorEventos) {
+        if (!respuestaEventos.ok) {
           console.error(
-            "Error cargando eventos:",
-            errorEventos
+            "Error cargando eventos."
           );
 
           setError(
@@ -133,8 +88,11 @@ export default function EventosDisponibles() {
           return;
         }
 
+        const datosEventos =
+          await respuestaEventos.json();
+
         setEventos(
-          eventosData ?? []
+          datosEventos.eventos ?? []
         );
 
         /*
@@ -448,8 +406,8 @@ export default function EventosDisponibles() {
                       >
 
                         {/*
-                       * CABECERA
-                       */}
+                         * CABECERA
+                         */}
                         <div className="flex items-center justify-between gap-3">
 
                           <p className="text-xs font-semibold text-[#1B396A]">
@@ -471,8 +429,8 @@ export default function EventosDisponibles() {
                         </div>
 
                         {/*
-                       * INFORMACIÓN
-                       */}
+                         * INFORMACIÓN
+                         */}
                         <div className="mt-5 text-center">
 
                           <h2 className="text-xl font-bold !text-[#1F2937]">
@@ -488,8 +446,8 @@ export default function EventosDisponibles() {
                         </div>
 
                         {/*
-                       * FECHA Y HORA
-                       */}
+                         * FECHA Y HORA
+                         */}
                         <div className="mt-6 grid grid-cols-2 gap-3">
 
                           <div className="rounded-xl bg-slate-50 p-4 text-center">
@@ -523,8 +481,8 @@ export default function EventosDisponibles() {
                         </div>
 
                         {/*
-                       * ACCIONES
-                       */}
+                         * ACCIONES
+                         */}
                         <div className="mt-auto pt-6">
 
                           {yaRegistrado ? (

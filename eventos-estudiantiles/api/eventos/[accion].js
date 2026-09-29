@@ -5,6 +5,10 @@ import finalizar from "../../server/eventos/finalizar.js";
 import inscribirse from "../../server/eventos/inscribirse.js";
 import misEventos from "../../server/eventos/mis-eventos.js";
 import detalle from "../../server/eventos/detalle.js";
+import disponibles from "../../server/eventos/disponibles.js";
+import publico from "../../server/eventos/publico.js";
+import listar from "../../server/eventos/listar.js";
+import dashboard from "../../server/eventos/dashboard.js";
 
 export default async function handler(req, res) {
   const parametro = req.query?.accion;
@@ -34,6 +38,18 @@ export default async function handler(req, res) {
 
     case "detalle":
       return detalle(req, res);
+
+    case "disponibles":
+      return disponibles(req, res);
+
+    case "publico":
+      return publico(req, res);
+
+    case "listar":
+      return listar(req, res);
+
+    case "dashboard":
+      return dashboard(req, res);
 
     default:
       return res.status(404).json({

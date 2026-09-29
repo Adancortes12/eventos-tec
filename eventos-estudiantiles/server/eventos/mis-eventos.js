@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { db } from "../lib/db.js";
 
 import {
   obtenerCookie,
@@ -40,29 +40,21 @@ export default async function handler(req, res) {
      * 2. COMPROBAR QUE EL ESTUDIANTE
      * SIGUE EXISTIENDO
      */
-    const {
-      data: estudiante,
-      error: errorEstudiante,
-    } = await supabaseAdmin
-      .from("estudiantes")
-      .select(`
-        id,
-        numero_estudiante
-      `)
-      .eq("id", sesion.id)
-      .maybeSingle();
-
-    if (errorEstudiante) {
-      console.error(
-        "Error consultando estudiante:",
-        errorEstudiante
+    const resultadoEstudiante =
+      await db.query(
+        `
+          SELECT
+            id,
+            numero_estudiante
+          FROM estudiantes
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [sesion.id]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo consultar al estudiante.",
-      });
-    }
+    const estudiante =
+      resultadoEstudiante.rows[0];
 
     if (!estudiante) {
       return res.status(401).json({
@@ -74,75 +66,87 @@ export default async function handler(req, res) {
 
     /*
      * 3. CONSULTAR SUS INSCRIPCIONES
+     * JUNTO CON LOS DATOS DEL EVENTO
      */
-    const {
-      data: inscripciones,
-      error: errorInscripciones,
-    } = await supabaseAdmin
-      .from("inscripciones")
-      .select(`
-        id,
-        token_qr,
-        registrado_en,
-        asistio,
-        asistio_en,
-        eventos (
-          id,
-          codigo_evento,
-          nombre,
-          descripcion,
-          fecha_evento,
-          hora_evento,
-          estado,
-          cierre_inscripcion
-        )
-      `)
-      .eq(
-        "estudiante_id",
-        estudiante.id
-      )
-      .order(
-        "registrado_en",
-        {
-          ascending: false,
-        }
-      );
+    const resultadoInscripciones =
+      await db.query(
+        `
+          SELECT
+            i.id AS inscripcion_id,
+            i.token_qr,
+            i.registrado_en,
+            i.asistio,
+            i.asistio_en,
 
-    if (errorInscripciones) {
-      console.error(
-        "Error consultando inscripciones:",
-        errorInscripciones
-      );
+            e.id AS evento_id,
+            e.codigo_evento,
+            e.nombre,
+            e.descripcion,
+            e.fecha_evento,
+            e.hora_evento,
+            e.estado,
+            e.cierre_inscripcion
 
-      return res.status(500).json({
-        error:
-          "No se pudieron consultar tus eventos.",
-      });
-    }
+          FROM inscripciones AS i
+
+          INNER JOIN eventos AS e
+            ON e.id = i.evento_id
+
+          WHERE i.estudiante_id = $1
+
+          ORDER BY i.registrado_en DESC
+        `,
+        [estudiante.id]
+      );
 
     /*
-     * 4. RESPUESTA
+     * 4. MANTENER LA MISMA
+     * ESTRUCTURA DE RESPUESTA
+     * QUE TENÍAMOS CON SUPABASE
      */
     const eventos =
-      (inscripciones ?? []).map(
-        (inscripcion) => ({
+      resultadoInscripciones.rows.map(
+        (fila) => ({
           inscripcionId:
-            inscripcion.id,
+            fila.inscripcion_id,
 
           tokenQr:
-            inscripcion.token_qr,
+            fila.token_qr,
 
           registradoEn:
-            inscripcion.registrado_en,
+            fila.registrado_en,
 
           asistio:
-            inscripcion.asistio,
+            fila.asistio,
 
           asistioEn:
-            inscripcion.asistio_en,
+            fila.asistio_en,
 
-          evento:
-            inscripcion.eventos,
+          evento: {
+            id:
+              fila.evento_id,
+
+            codigo_evento:
+              fila.codigo_evento,
+
+            nombre:
+              fila.nombre,
+
+            descripcion:
+              fila.descripcion,
+
+            fecha_evento:
+              fila.fecha_evento,
+
+            hora_evento:
+              fila.hora_evento,
+
+            estado:
+              fila.estado,
+
+            cierre_inscripcion:
+              fila.cierre_inscripcion,
+          },
         })
       );
 
@@ -162,4 +166,3 @@ export default async function handler(req, res) {
     });
   }
 }
-

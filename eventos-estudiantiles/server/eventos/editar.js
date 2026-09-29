@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { db } from "../lib/db.js";
 
 import {
   obtenerCookie,
@@ -55,33 +55,22 @@ export default async function handler(
     /*
      * 2. CONSULTAR ROL ACTUAL
      */
-    const {
-      data: maestro,
-      error: errorMaestro,
-    } = await supabaseAdmin
-      .from("maestros")
-      .select(`
-        id,
-        rol_sistema,
-        activo
-      `)
-      .eq(
-        "id",
-        sesion.id
-      )
-      .maybeSingle();
-
-    if (errorMaestro) {
-      console.error(
-        "Error consultando maestro:",
-        errorMaestro
+    const resultadoMaestro =
+      await db.query(
+        `
+          SELECT
+            id,
+            rol_sistema,
+            activo
+          FROM maestros
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [sesion.id]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo verificar el usuario.",
-      });
-    }
+    const maestro =
+      resultadoMaestro.rows[0];
 
     if (
       !maestro ||
@@ -97,10 +86,8 @@ export default async function handler(
      * SOLO ADMIN Y SUPERADMIN
      */
     const puedeEditar =
-      maestro.rol_sistema ===
-        "admin" ||
-      maestro.rol_sistema ===
-        "superadmin";
+      maestro.rol_sistema === "admin" ||
+      maestro.rol_sistema === "superadmin";
 
     if (!puedeEditar) {
       return res.status(403).json({
@@ -135,32 +122,21 @@ export default async function handler(
     /*
      * 4. COMPROBAR EVENTO
      */
-    const {
-      data: eventoActual,
-      error: errorEvento,
-    } = await supabaseAdmin
-      .from("eventos")
-      .select(`
-        id,
-        estado
-      `)
-      .eq(
-        "id",
-        eventoId
-      )
-      .maybeSingle();
-
-    if (errorEvento) {
-      console.error(
-        "Error consultando evento:",
-        errorEvento
+    const resultadoEvento =
+      await db.query(
+        `
+          SELECT
+            id,
+            estado
+          FROM eventos
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [eventoId]
       );
 
-      return res.status(500).json({
-        error:
-          "No se pudo consultar el evento.",
-      });
-    }
+    const eventoActual =
+      resultadoEvento.rows[0];
 
     if (!eventoActual) {
       return res.status(404).json({
@@ -196,8 +172,7 @@ export default async function handler(
     }
 
     if (
-      typeof fechaEvento !==
-        "string" ||
+      typeof fechaEvento !== "string" ||
       !fechaValida(fechaEvento)
     ) {
       return res.status(400).json({
@@ -207,8 +182,7 @@ export default async function handler(
     }
 
     if (
-      typeof horaEvento !==
-        "string" ||
+      typeof horaEvento !== "string" ||
       !horaValida(horaEvento)
     ) {
       return res.status(400).json({
@@ -218,8 +192,7 @@ export default async function handler(
     }
 
     if (
-      typeof fechaActivacion !==
-        "string" ||
+      typeof fechaActivacion !== "string" ||
       !fechaActivacion
     ) {
       return res.status(400).json({
@@ -229,14 +202,10 @@ export default async function handler(
     }
 
     const duracion =
-      Number(
-        duracionMinutos
-      );
+      Number(duracionMinutos);
 
     if (
-      !Number.isInteger(
-        duracion
-      ) ||
+      !Number.isInteger(duracion) ||
       duracion <= 0 ||
       duracion > 1440
     ) {
@@ -266,65 +235,56 @@ export default async function handler(
     /*
      * 6. ACTUALIZAR
      *
-     * No modificamos estado aquí.
-     * Finalizar será otra acción segura.
+     * El estado no se modifica aquí.
      */
-    const {
-      data: evento,
-      error: errorActualizacion,
-    } = await supabaseAdmin
-      .from("eventos")
-      .update({
-        nombre:
+    const resultadoActualizacion =
+      await db.query(
+        `
+          UPDATE eventos
+          SET
+            nombre = $1,
+            descripcion = $2,
+            fecha_evento = $3,
+            hora_evento = $4,
+            fecha_activacion = $5,
+            duracion_minutos = $6
+          WHERE id = $7
+          RETURNING
+            id,
+            codigo_evento,
+            nombre,
+            descripcion,
+            fecha_evento,
+            hora_evento,
+            estado,
+            fecha_activacion,
+            duracion_minutos,
+            cierre_inscripcion,
+            creado_por
+        `,
+        [
           nombre.trim(),
 
-        descripcion:
-          typeof descripcion ===
-            "string" &&
+          typeof descripcion === "string" &&
           descripcion.trim()
             ? descripcion.trim()
             : null,
 
-        fecha_evento:
           fechaEvento,
-
-        hora_evento:
           horaEvento,
-
-        fecha_activacion:
           fechaActivacion,
-
-        duracion_minutos:
           duracion,
-      })
-      .eq(
-        "id",
-        eventoId
-      )
-      .select(`
-        id,
-        codigo_evento,
-        nombre,
-        descripcion,
-        fecha_evento,
-        hora_evento,
-        estado,
-        fecha_activacion,
-        duracion_minutos,
-        cierre_inscripcion,
-        creado_por
-      `)
-      .single();
-
-    if (errorActualizacion) {
-      console.error(
-        "Error actualizando evento:",
-        errorActualizacion
+          eventoId,
+        ]
       );
 
-      return res.status(500).json({
+    const evento =
+      resultadoActualizacion.rows[0];
+
+    if (!evento) {
+      return res.status(404).json({
         error:
-          "No se pudieron guardar los cambios.",
+          "El evento no existe.",
       });
     }
 
@@ -344,4 +304,3 @@ export default async function handler(
     });
   }
 }
-

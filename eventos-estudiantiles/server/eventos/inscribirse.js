@@ -1,8 +1,11 @@
 import { randomUUID } from "node:crypto";
 
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { db } from "../lib/db.js";
 
-import { obtenerCookie, verificarSesion } from "../lib/session.js";
+import {
+  obtenerCookie,
+  verificarSesion,
+} from "../lib/session.js";
 
 /*
  * Convierte la hora actual a la hora local
@@ -10,21 +13,27 @@ import { obtenerCookie, verificarSesion } from "../lib/session.js";
  * timestamp de eventos.
  */
 function obtenerAhoraLocal() {
-  const partes = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Mexico_City",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(new Date());
+  const partes =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23",
+      }
+    ).formatToParts(new Date());
 
   const valores = {};
 
   for (const parte of partes) {
-    valores[parte.type] = parte.value;
+    valores[parte.type] =
+      parte.value;
   }
 
   return (
@@ -37,50 +46,66 @@ function obtenerAhoraLocal() {
   );
 }
 
-function normalizarFecha(valor) {
-  if (!valor) {
-    return null;
-  }
-
-  return String(valor).replace(" ", "T").slice(0, 19);
-}
-
 /*
  * Obtener token de SITEc para
  * consultas servidor-servidor.
  */
 async function obtenerTokenSitec() {
-  const { SIITEC_CLIENT_ID, SIITEC_CLIENT_SECRET, SIITEC_TOKEN_ENDPOINT } =
-    process.env;
+  const {
+    SIITEC_CLIENT_ID,
+    SIITEC_CLIENT_SECRET,
+    SIITEC_TOKEN_ENDPOINT,
+  } = process.env;
 
-  if (!SIITEC_CLIENT_ID || !SIITEC_CLIENT_SECRET || !SIITEC_TOKEN_ENDPOINT) {
-    throw new Error("Faltan variables de SIITEC.");
+  if (
+    !SIITEC_CLIENT_ID ||
+    !SIITEC_CLIENT_SECRET ||
+    !SIITEC_TOKEN_ENDPOINT
+  ) {
+    throw new Error(
+      "Faltan variables de SIITEC."
+    );
   }
 
-  const credenciales = Buffer.from(
-    `${SIITEC_CLIENT_ID}:${SIITEC_CLIENT_SECRET}`,
-  ).toString("base64");
+  const credenciales =
+    Buffer.from(
+      `${SIITEC_CLIENT_ID}:${SIITEC_CLIENT_SECRET}`
+    ).toString("base64");
 
-  const body = new URLSearchParams({
-    grant_type: "client_credentials",
-  });
+  const body =
+    new URLSearchParams({
+      grant_type:
+        "client_credentials",
+    });
 
-  const respuesta = await fetch(SIITEC_TOKEN_ENDPOINT, {
-    method: "POST",
+  const respuesta =
+    await fetch(
+      SIITEC_TOKEN_ENDPOINT,
+      {
+        method: "POST",
 
-    headers: {
-      Authorization: `Basic ${credenciales}`,
+        headers: {
+          Authorization:
+            `Basic ${credenciales}`,
 
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
+          "Content-Type":
+            "application/x-www-form-urlencoded",
+        },
 
-    body: body.toString(),
-  });
+        body: body.toString(),
+      }
+    );
 
-  const datos = await respuesta.json();
+  const datos =
+    await respuesta.json();
 
-  if (!respuesta.ok || !datos.access_token) {
-    throw new Error("No se pudo obtener el token de SIITEC.");
+  if (
+    !respuesta.ok ||
+    !datos.access_token
+  ) {
+    throw new Error(
+      "No se pudo obtener el token de SIITEC."
+    );
   }
 
   return datos.access_token;
@@ -90,43 +115,72 @@ async function obtenerTokenSitec() {
  * Obtener los datos actuales
  * del estudiante desde SITEc.
  */
-async function obtenerEstudianteSitec(numeroEstudiante, sitecUsuarioId) {
-  const endpoint = process.env.SIITEC_USUARIOS_ENDPOINT;
+async function obtenerEstudianteSitec(
+  numeroEstudiante,
+  sitecUsuarioId
+) {
+  const endpoint =
+    process.env
+      .SIITEC_USUARIOS_ENDPOINT;
 
   if (!endpoint) {
-    throw new Error("Falta SIITEC_USUARIOS_ENDPOINT.");
+    throw new Error(
+      "Falta SIITEC_USUARIOS_ENDPOINT."
+    );
   }
 
-  const token = await obtenerTokenSitec();
+  const token =
+    await obtenerTokenSitec();
 
-  const parametros = new URLSearchParams({
-    matricula: numeroEstudiante,
-    activo: "1",
-  });
+  const parametros =
+    new URLSearchParams({
+      matricula:
+        numeroEstudiante,
+      activo: "1",
+    });
 
-  const respuesta = await fetch(`${endpoint}?${parametros.toString()}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const respuesta =
+    await fetch(
+      `${endpoint}?${parametros.toString()}`,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${token}`,
+        },
+      }
+    );
 
-  const datos = await respuesta.json();
+  const datos =
+    await respuesta.json();
 
-  if (!respuesta.ok || !Array.isArray(datos)) {
-    throw new Error("No se pudo consultar al estudiante en SIITEC.");
+  if (
+    !respuesta.ok ||
+    !Array.isArray(datos)
+  ) {
+    throw new Error(
+      "No se pudo consultar al estudiante en SIITEC."
+    );
   }
 
   return (
     datos.find(
-      (usuario) => String(usuario.usuario_id) === String(sitecUsuarioId),
+      (usuario) =>
+        String(
+          usuario.usuario_id
+        ) ===
+        String(sitecUsuarioId)
     ) ?? null
   );
 }
 
-export default async function handler(req, res) {
+export default async function handler(
+  req,
+  res
+) {
   if (req.method !== "POST") {
     return res.status(405).json({
-      error: "Método no permitido.",
+      error:
+        "Método no permitido.",
     });
   }
 
@@ -134,161 +188,208 @@ export default async function handler(req, res) {
     /*
      * 1. VERIFICAR SESIÓN
      */
-    const tokenSesion = obtenerCookie(req, "eventos_session");
+    const tokenSesion =
+      obtenerCookie(
+        req,
+        "eventos_session"
+      );
 
-    const sesion = verificarSesion(tokenSesion);
+    const sesion =
+      verificarSesion(
+        tokenSesion
+      );
 
-    if (!sesion || sesion.tipo !== "estudiante") {
+    if (
+      !sesion ||
+      sesion.tipo !== "estudiante"
+    ) {
       return res.status(401).json({
-        error: "Debes iniciar sesión como estudiante.",
+        error:
+          "Debes iniciar sesión como estudiante.",
       });
     }
 
     /*
      * 2. OBTENER CÓDIGO DEL EVENTO
      */
-    const { codigoEvento } = req.body ?? {};
+    const {
+      codigoEvento,
+    } = req.body ?? {};
 
-    if (!codigoEvento || typeof codigoEvento !== "string") {
+    if (
+      !codigoEvento ||
+      typeof codigoEvento !==
+        "string"
+    ) {
       return res.status(400).json({
-        error: "No se recibió un evento válido.",
+        error:
+          "No se recibió un evento válido.",
       });
     }
 
     /*
      * 3. OBTENER ESTUDIANTE INTERNO
      */
-    const { data: estudiante, error: errorEstudiante } = await supabaseAdmin
-      .from("estudiantes")
-      .select(
+    const resultadoEstudiante =
+      await db.query(
         `
-        id,
-        sitec_usuario_id,
-        numero_estudiante
-      `,
-      )
-      .eq("id", sesion.id)
-      .maybeSingle();
+          SELECT
+            id,
+            sitec_usuario_id,
+            numero_estudiante
+          FROM estudiantes
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [sesion.id]
+      );
 
-    if (errorEstudiante) {
-      console.error("Error estudiante:", errorEstudiante);
-
-      return res.status(500).json({
-        error: "No se pudo consultar al estudiante.",
-      });
-    }
+    const estudiante =
+      resultadoEstudiante.rows[0];
 
     if (!estudiante) {
       return res.status(401).json({
-        error: "El estudiante ya no existe en el sistema.",
+        error:
+          "El estudiante ya no existe en el sistema.",
       });
     }
 
     /*
      * 4. OBTENER EVENTO
+     *
+     * Convertimos los timestamps a texto
+     * local para evitar conversiones de zona
+     * horaria hechas por Node/PostgreSQL.
      */
-    const { data: evento, error: errorEvento } = await supabaseAdmin
-      .from("eventos")
-      .select(
+    const resultadoEvento =
+      await db.query(
         `
-        id,
-        codigo_evento,
-        nombre,
-        fecha_evento,
-        hora_evento,
-        estado,
-        fecha_activacion,
-        cierre_inscripcion
-      `,
-      )
-      .eq("codigo_evento", codigoEvento)
-      .maybeSingle();
+          SELECT
+            id,
+            codigo_evento,
+            nombre,
+            fecha_evento,
+            hora_evento,
+            estado,
 
-    if (errorEvento) {
-      console.error("Error evento:", errorEvento);
+            TO_CHAR(
+              fecha_activacion,
+              'YYYY-MM-DD"T"HH24:MI:SS'
+            ) AS fecha_activacion,
 
-      return res.status(500).json({
-        error: "No se pudo consultar el evento.",
-      });
-    }
+            TO_CHAR(
+              cierre_inscripcion,
+              'YYYY-MM-DD"T"HH24:MI:SS'
+            ) AS cierre_inscripcion
+
+          FROM eventos
+          WHERE codigo_evento = $1
+          LIMIT 1
+        `,
+        [codigoEvento]
+      );
+
+    const evento =
+      resultadoEvento.rows[0];
 
     if (!evento) {
       return res.status(404).json({
-        error: "El evento no existe.",
+        error:
+          "El evento no existe.",
       });
     }
 
     /*
      * 5. VERIFICAR DISPONIBILIDAD
      */
-    if (evento.estado !== "activo") {
+    if (
+      evento.estado !== "activo"
+    ) {
       return res.status(400).json({
-        error: "Este evento ya no está activo.",
+        error:
+          "Este evento ya no está activo.",
       });
     }
 
-    const ahora = obtenerAhoraLocal();
+    const ahora =
+      obtenerAhoraLocal();
 
-    const activacion = normalizarFecha(evento.fecha_activacion);
+    const activacion =
+      evento.fecha_activacion;
 
-    const cierre = normalizarFecha(evento.cierre_inscripcion);
+    const cierre =
+      evento.cierre_inscripcion;
 
-    if (activacion && ahora < activacion) {
+    if (
+      activacion &&
+      ahora < activacion
+    ) {
       return res.status(400).json({
         error:
           "Las inscripciones para este evento todavía no están disponibles.",
       });
     }
 
-    if (cierre && ahora > cierre) {
+    if (
+      cierre &&
+      ahora > cierre
+    ) {
       return res.status(400).json({
-        error: "Las inscripciones para este evento ya cerraron.",
+        error:
+          "Las inscripciones para este evento ya cerraron.",
       });
     }
 
     /*
      * 6. COMPROBAR SI YA ESTÁ INSCRITO
      */
-    const { data: inscripcionExistente, error: errorInscripcionExistente } =
-      await supabaseAdmin
-        .from("inscripciones")
-        .select(
-          `
-        id,
-        estudiante_id,
-        token_qr,
-        registrado_en,
-        asistio
-      `,
-        )
-        .eq("evento_id", evento.id)
-        .eq("numero_estudiante", estudiante.numero_estudiante)
-        .maybeSingle();
+    const resultadoExistente =
+      await db.query(
+        `
+          SELECT
+            id,
+            estudiante_id,
+            token_qr,
+            registrado_en,
+            asistio
+          FROM inscripciones
+          WHERE evento_id = $1
+            AND numero_estudiante = $2
+          LIMIT 1
+        `,
+        [
+          evento.id,
+          estudiante.numero_estudiante,
+        ]
+      );
 
-    if (errorInscripcionExistente) {
-      console.error("Error buscando inscripción:", errorInscripcionExistente);
-
-      return res.status(500).json({
-        error: "No se pudo consultar la inscripción.",
-      });
-    }
+    const inscripcionExistente =
+      resultadoExistente.rows[0];
 
     /*
-     * Si ya estaba inscrito, devolvemos
-     * el mismo QR.
+     * Si ya estaba inscrito,
+     * devolvemos el mismo QR.
      */
     if (inscripcionExistente) {
       /*
-       * Para registros viejos que todavía
-       * no tenían estudiante_id.
+       * Para registros viejos que
+       * todavía no tenían estudiante_id.
        */
-      if (!inscripcionExistente.estudiante_id) {
-        await supabaseAdmin
-          .from("inscripciones")
-          .update({
-            estudiante_id: estudiante.id,
-          })
-          .eq("id", inscripcionExistente.id);
+      if (
+        !inscripcionExistente.estudiante_id
+      ) {
+        await db.query(
+          `
+            UPDATE inscripciones
+            SET estudiante_id = $1
+            WHERE id = $2
+              AND estudiante_id IS NULL
+          `,
+          [
+            estudiante.id,
+            inscripcionExistente.id,
+          ]
+        );
       }
 
       return res.status(200).json({
@@ -296,38 +397,49 @@ export default async function handler(req, res) {
         yaExistia: true,
 
         inscripcion: {
-          id: inscripcionExistente.id,
+          id:
+            inscripcionExistente.id,
 
-          tokenQr: inscripcionExistente.token_qr,
+          tokenQr:
+            inscripcionExistente.token_qr,
 
-          registradoEn: inscripcionExistente.registrado_en,
+          registradoEn:
+            inscripcionExistente.registrado_en,
 
-          asistio: inscripcionExistente.asistio,
+          asistio:
+            inscripcionExistente.asistio,
         },
 
         evento: {
-          codigo: evento.codigo_evento,
+          codigo:
+            evento.codigo_evento,
 
-          nombre: evento.nombre,
+          nombre:
+            evento.nombre,
 
-          fecha: evento.fecha_evento,
+          fecha:
+            evento.fecha_evento,
 
-          hora: evento.hora_evento,
+          hora:
+            evento.hora_evento,
         },
       });
     }
 
     /*
-     * 7. CONSULTAR DATOS ACTUALES EN SITEc
+     * 7. CONSULTAR DATOS ACTUALES
+     * DEL ESTUDIANTE EN SITEc
      */
-    const perfilSitec = await obtenerEstudianteSitec(
-      estudiante.numero_estudiante,
-      estudiante.sitec_usuario_id,
-    );
+    const perfilSitec =
+      await obtenerEstudianteSitec(
+        estudiante.numero_estudiante,
+        estudiante.sitec_usuario_id
+      );
 
     if (!perfilSitec) {
       return res.status(404).json({
-        error: "No se pudo encontrar el perfil del estudiante en SIITEC.",
+        error:
+          "No se pudo encontrar el perfil del estudiante en SIITEC.",
       });
     }
 
@@ -343,82 +455,175 @@ export default async function handler(req, res) {
     /*
      * 8. CREAR TOKEN ÚNICO PARA EL QR
      */
-    const tokenQr = randomUUID();
+    const tokenQr =
+      randomUUID();
 
     /*
      * 9. GUARDAR INSCRIPCIÓN
      */
-    const { data: inscripcion, error: errorCreacion } = await supabaseAdmin
-      .from("inscripciones")
-      .insert({
-        evento_id: evento.id,
+    try {
+      const resultadoCreacion =
+        await db.query(
+          `
+            INSERT INTO inscripciones (
+              evento_id,
+              estudiante_id,
+              numero_estudiante,
+              nombre_completo,
+              genero,
+              carrera,
+              token_qr,
+              asistio
+            )
+            VALUES (
+              $1,
+              $2,
+              $3,
+              $4,
+              $5,
+              $6,
+              $7,
+              FALSE
+            )
+            RETURNING
+              id,
+              token_qr,
+              registrado_en,
+              asistio
+          `,
+          [
+            evento.id,
+            estudiante.id,
+            estudiante.numero_estudiante,
+            nombreCompleto,
+            perfilSitec.sexo ?? null,
+            perfilSitec.carrera ?? null,
+            tokenQr,
+          ]
+        );
 
-        estudiante_id: estudiante.id,
+      const inscripcion =
+        resultadoCreacion.rows[0];
 
-        numero_estudiante: estudiante.numero_estudiante,
+      return res.status(201).json({
+        inscrito: true,
+        yaExistia: false,
 
-        nombre_completo: nombreCompleto,
+        inscripcion: {
+          id:
+            inscripcion.id,
 
-        genero: perfilSitec.sexo ?? null,
+          tokenQr:
+            inscripcion.token_qr,
 
-        carrera: perfilSitec.carrera ?? null,
+          registradoEn:
+            inscripcion.registrado_en,
 
-        token_qr: tokenQr,
+          asistio:
+            inscripcion.asistio,
+        },
 
-        asistio: false,
-      })
-      .select(
-        `
-        id,
-        token_qr,
-        registrado_en,
-        asistio
-      `,
-      )
-      .single();
+        evento: {
+          codigo:
+            evento.codigo_evento,
 
-    if (errorCreacion) {
-      console.error("Error creando inscripción:", errorCreacion);
+          nombre:
+            evento.nombre,
+
+          fecha:
+            evento.fecha_evento,
+
+          hora:
+            evento.hora_evento,
+        },
+      });
+    } catch (errorCreacion) {
+      /*
+       * Si dos solicitudes intentan
+       * registrar al mismo alumno
+       * prácticamente al mismo tiempo,
+       * PostgreSQL protege el duplicado.
+       */
+      if (
+        errorCreacion.code === "23505"
+      ) {
+        const resultadoDuplicado =
+          await db.query(
+            `
+              SELECT
+                id,
+                token_qr,
+                registrado_en,
+                asistio
+              FROM inscripciones
+              WHERE evento_id = $1
+                AND numero_estudiante = $2
+              LIMIT 1
+            `,
+            [
+              evento.id,
+              estudiante.numero_estudiante,
+            ]
+          );
+
+        const inscripcion =
+          resultadoDuplicado.rows[0];
+
+        if (inscripcion) {
+          return res.status(200).json({
+            inscrito: true,
+            yaExistia: true,
+
+            inscripcion: {
+              id:
+                inscripcion.id,
+
+              tokenQr:
+                inscripcion.token_qr,
+
+              registradoEn:
+                inscripcion.registrado_en,
+
+              asistio:
+                inscripcion.asistio,
+            },
+
+            evento: {
+              codigo:
+                evento.codigo_evento,
+
+              nombre:
+                evento.nombre,
+
+              fecha:
+                evento.fecha_evento,
+
+              hora:
+                evento.hora_evento,
+            },
+          });
+        }
+      }
+
+      console.error(
+        "Error creando inscripción:",
+        errorCreacion
+      );
 
       return res.status(500).json({
-        error: "No se pudo registrar al estudiante en el evento.",
+        error:
+          "No se pudo registrar al estudiante en el evento.",
       });
     }
-
-    /*
-     * 10. RESPUESTA
-     */
-    return res.status(201).json({
-      inscrito: true,
-      yaExistia: false,
-
-      inscripcion: {
-        id: inscripcion.id,
-
-        tokenQr: inscripcion.token_qr,
-
-        registradoEn: inscripcion.registrado_en,
-
-        asistio: inscripcion.asistio,
-      },
-
-      evento: {
-        codigo: evento.codigo_evento,
-
-        nombre: evento.nombre,
-
-        fecha: evento.fecha_evento,
-
-        hora: evento.hora_evento,
-      },
-    });
   } catch (error) {
-    console.error("Error registrando estudiante:", error);
+    console.error(
+      "Error registrando estudiante:",
+      error
+    );
 
     return res.status(500).json({
-      error: "Ocurrió un error al realizar la inscripción.",
+      error:
+        "Ocurrió un error al realizar la inscripción.",
     });
   }
 }
-
-

@@ -1,99 +1,196 @@
-import { useState } from "react";
-import type { FormEvent } from "react";
-import { supabase } from "../../lib/supabase";
-import { useNavigate } from "react-router";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useNavigate,
+} from "react-router";
+
+import {
+  iniciarSesionSitec,
+  obtenerSesion,
+} from "../../lib/sesion";
 
 export default function Login() {
-const navigate = useNavigate();
-  const [correo, setCorreo] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState("");
+  const navigate =
+    useNavigate();
 
-  const iniciarSesion = async (e: FormEvent) => {
-    e.preventDefault();
+  const [
+    cargando,
+    setCargando,
+  ] = useState(true);
 
-    setCargando(true);
-    setError("");
+  const [
+    redirigiendo,
+    setRedirigiendo,
+  ] = useState(false);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: correo,
-      password: contrasena,
-    });
+  const [
+    error,
+    setError,
+  ] = useState("");
 
-    if (error) {
-      setError("Correo o contraseña incorrectos.");
-      setCargando(false);
-      return;
+  /*
+   * Si ya existe una sesión válida,
+   * no mostramos nuevamente el login.
+   */
+  useEffect(() => {
+    async function comprobarSesion() {
+      try {
+        const sesion =
+          await obtenerSesion();
+
+        if (
+          sesion?.tipo === "maestro"
+        ) {
+          navigate(
+            "/admin",
+            {
+              replace: true,
+            }
+          );
+
+          return;
+        }
+
+        if (
+          sesion?.tipo ===
+          "estudiante"
+        ) {
+          navigate(
+            "/",
+            {
+              replace: true,
+            }
+          );
+
+          return;
+        }
+      } catch (error) {
+        console.error(
+          "Error comprobando sesión:",
+          error
+        );
+      } finally {
+        setCargando(false);
+      }
     }
 
-    setCargando(false);
-    navigate("/admin");
-    console.log("Sesión iniciada correctamente");
-  };
+    comprobarSesion();
+  }, [navigate]);
+
+  function iniciarSesion() {
+    try {
+      setError("");
+      setRedirigiendo(true);
+
+      /*
+       * SITEc realizará la
+       * autenticación.
+       *
+       * El backend recibirá el
+       * callback, comprobará el
+       * usuario y creará nuestra
+       * cookie de sesión.
+       */
+      iniciarSesionSitec();
+    } catch (error) {
+      console.error(
+        "Error iniciando sesión con SITEc:",
+        error
+      );
+
+      setError(
+        "No se pudo iniciar sesión con SITEc."
+      );
+
+      setRedirigiendo(false);
+    }
+  }
+
+  if (cargando) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#F5F5F5] px-4">
+
+        <div className="text-center">
+
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#1B396A]" />
+
+          <p className="mt-4 text-sm text-gray-600">
+            Comprobando sesión...
+          </p>
+
+        </div>
+
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#F5F5F5] px-4">
+
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow">
+
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-[#1B396A]">
+
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1B396A] text-xl font-bold text-white">
+            EA
+          </div>
+
+          <h1 className="mt-5 text-3xl font-bold text-slate-900">
             Administración
           </h1>
 
           <p className="mt-2 text-gray-600">
             Sistema de eventos estudiantiles
           </p>
+
         </div>
 
-        <form
-          onSubmit={iniciarSesion}
-          className="mt-8 space-y-5"
-        >
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-800">
-              Correo
-            </label>
+        <div className="mt-8">
 
-            <input
-              type="email"
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              required
-              placeholder="admin@escuela.mx"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-[#1B396A] outline-none focus:border-[#1B396A]"
-            />
-          </div>
+          <div className="rounded-xl bg-slate-50 p-4">
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-800">
-              Contraseña
-            </label>
+            <p className="text-center text-sm leading-6 text-gray-600">
+              Inicia sesión con tu cuenta institucional de SITEc para acceder al sistema.
+            </p>
 
-            <input
-              type="password"
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-[#1B396A] outline-none focus:border-[#1B396A]"
-            />
           </div>
 
           {error && (
-            <p className="text-center text-sm text-red-600">
-              {error}
-            </p>
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+
+              <p className="text-center text-sm text-red-600">
+                {error}
+              </p>
+
+            </div>
           )}
 
           <button
-            type="submit"
-            disabled={cargando}
-            className="w-full rounded-lg bg-[#1B396A] px-4 py-3 font-semibold text-white disabled:opacity-50"
+            type="button"
+            onClick={
+              iniciarSesion
+            }
+            disabled={
+              redirigiendo
+            }
+            className="mt-5 w-full rounded-xl bg-[#1B396A] px-4 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {cargando ? "Iniciando sesión..." : "Iniciar sesión"}
+            {redirigiendo
+              ? "Redirigiendo a SITEc..."
+              : "Iniciar sesión con SITEc"}
           </button>
-        </form>
+
+          <p className="mt-4 text-center text-xs leading-5 text-slate-400">
+            El acceso al panel depende de los permisos asignados a tu cuenta.
+          </p>
+
+        </div>
+
       </div>
+
     </main>
   );
 }
