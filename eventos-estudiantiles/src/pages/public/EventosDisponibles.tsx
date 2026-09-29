@@ -481,9 +481,7 @@ export default function EventosDisponibles() {
 
                           {evento.descripcion && (
                             <p className="mt-2 line-clamp-3 text-sm leading-6 !text-[#4B5563]">
-                              {
-                                evento.descripcion
-                              }
+                              {evento.descripcion}
                             </p>
                           )}
 
