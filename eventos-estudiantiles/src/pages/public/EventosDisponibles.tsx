@@ -71,7 +71,7 @@ export default function EventosDisponibles() {
 
         const ahoraLocal = new Date(
           ahora.getTime() -
-            ahora.getTimezoneOffset() * 60000
+          ahora.getTimezoneOffset() * 60000
         )
           .toISOString()
           .slice(0, 19);
@@ -315,30 +315,30 @@ export default function EventosDisponibles() {
             className="flex items-center gap-3"
           >
 
-  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#1B396A]">
-  EA
-</div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#1B396A]">
+              EA
+            </div>
 
             <div className="hidden sm:block">
-<p className="font-bold text-white">
-  Eventos Estudiantiles
-</p>
+              <p className="font-bold text-white">
+                Eventos Estudiantiles
+              </p>
 
-<p className="text-xs text-white/70">
-  Encuentra y registra tus eventos
-</p>
+              <p className="text-xs text-white/70">
+                Encuentra y registra tus eventos
+              </p>
             </div>
 
           </Link>
 
           <div className="flex items-center gap-4">
 
-<Link
-  to="/mis-eventos"
-  className="rounded-xl border border-white/60 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
->
-  Mis eventos
-</Link>
+            <Link
+              to="/mis-eventos"
+              className="rounded-xl border border-white/60 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+            >
+              Mis eventos
+            </Link>
 
             <SesionSitec />
 
@@ -351,27 +351,27 @@ export default function EventosDisponibles() {
       {/*
        * HERO
        */}
-<section className="border-b border-slate-200 bg-white">
+      <section className="border-b border-slate-200 bg-white">
 
-  <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 sm:py-16">
 
-    <p className="font-semibold !text-[#1B396A]">
-      Eventos disponibles
-    </p>
+          <p className="font-semibold !text-[#1B396A]">
+            Eventos disponibles
+          </p>
 
-    <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-bold tracking-tight !text-[#1F2937] sm:text-4xl">
-      Encuentra los próximos eventos y
-      regístrate fácilmente
-    </h1>
+          <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-bold tracking-tight !text-[#1F2937] sm:text-4xl">
+            Encuentra los próximos eventos y
+            regístrate fácilmente
+          </h1>
 
-    <p className="mx-auto mt-5 max-w-3xl text-base !text-[#4B5563]">
-      Selecciona un evento, inicia sesión con
-      SIITEC y obtén tu código QR de acceso.
-    </p>
+          <p className="mx-auto mt-5 max-w-3xl text-base !text-[#4B5563]">
+            Selecciona un evento, inicia sesión con
+            SIITEC y obtén tu código QR de acceso.
+          </p>
 
-  </div>
+        </div>
 
-</section>
+      </section>
 
       {/*
        * CONTENIDO
@@ -394,10 +394,10 @@ export default function EventosDisponibles() {
          */}
         {!cargando &&
           error && (
-          <div className="rounded-2xl bg-red-50 p-5 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+            <div className="rounded-2xl bg-red-50 p-5 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
         {/*
          * SIN EVENTOS
@@ -405,19 +405,18 @@ export default function EventosDisponibles() {
         {!cargando &&
           !error &&
           eventos.length === 0 && (
-          <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
+            <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
+              <h2 className="text-xl font-bold !text-[#1F2937]">
+                No hay eventos disponibles
+              </h2>
 
-            <h2 className="text-xl font-bold text-[#1F2937]">
-              No hay eventos disponibles
-            </h2>
+              <p className="mt-2 !text-[#4B5563]">
+                Cuando se publique un nuevo evento,
+                aparecerá aquí.
+              </p>
 
-            <p className="mt-2 text-slate-500">
-              Cuando se publique un nuevo evento,
-              aparecerá aquí.
-            </p>
-
-          </div>
-        )}
+            </div>
+          )}
 
         {/*
          * EVENTOS
@@ -425,147 +424,147 @@ export default function EventosDisponibles() {
         {!cargando &&
           !error &&
           eventos.length > 0 && (
-          <>
-            <p className="mb-6 text-sm text-slate-600">
-              {eventos.length}{" "}
-              {eventos.length === 1
-                ? "evento disponible"
-                : "eventos disponibles"}
-            </p>
+            <>
+              <p className="mb-6 text-sm text-slate-600">
+                {eventos.length}{" "}
+                {eventos.length === 1
+                  ? "evento disponible"
+                  : "eventos disponibles"}
+              </p>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 
-              {eventos.map(
-                (evento) => {
-                  const yaRegistrado =
-                    eventosRegistrados.has(
-                      evento.codigo_evento
-                    );
+                {eventos.map(
+                  (evento) => {
+                    const yaRegistrado =
+                      eventosRegistrados.has(
+                        evento.codigo_evento
+                      );
 
-                  return (
-                    <article
-                      key={evento.id}
-                      className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-                    >
+                    return (
+                      <article
+                        key={evento.id}
+                        className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                      >
 
-                      {/*
+                        {/*
                        * CABECERA
                        */}
-                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center justify-between gap-3">
 
-                        <p className="text-xs font-semibold text-[#1B396A]">
-                          {
-                            evento.codigo_evento
-                          }
-                        </p>
-
-                        {yaRegistrado ? (
-                          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                            Inscrito
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                            Disponible
-                          </span>
-                        )}
-
-                      </div>
-
-                      {/*
-                       * INFORMACIÓN
-                       */}
-                      <div className="mt-5 text-center">
-
-                        <h2 className="text-xl font-bold text-[#1F2937]">
-                          {evento.nombre}
-                        </h2>
-
-                        {evento.descripcion && (
-                          <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#4B5563]">
+                          <p className="text-xs font-semibold text-[#1B396A]">
                             {
-                              evento.descripcion
+                              evento.codigo_evento
                             }
                           </p>
-                        )}
 
-                      </div>
+                          {yaRegistrado ? (
+                            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                              Inscrito
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                              Disponible
+                            </span>
+                          )}
 
-                      {/*
+                        </div>
+
+                        {/*
+                       * INFORMACIÓN
+                       */}
+                        <div className="mt-5 text-center">
+
+                          <h2 className="text-xl font-bold !text-[#1F2937]">
+                            {evento.nombre}
+                          </h2>
+
+                          {evento.descripcion && (
+                            <p className="mt-2 line-clamp-3 text-sm leading-6 !text-[#4B5563]">
+                              {
+                                evento.descripcion
+                              }
+                            </p>
+                          )}
+
+                        </div>
+
+                        {/*
                        * FECHA Y HORA
                        */}
-                      <div className="mt-6 grid grid-cols-2 gap-3">
+                        <div className="mt-6 grid grid-cols-2 gap-3">
 
-                        <div className="rounded-xl bg-slate-50 p-4 text-center">
+                          <div className="rounded-xl bg-slate-50 p-4 text-center">
 
-                          <p className="text-xs font-medium uppercase text-slate-400">
-                            Fecha
-                          </p>
+                            <p className="text-xs font-medium uppercase text-slate-400">
+                              Fecha
+                            </p>
 
-                          <p className="mt-1 text-sm font-semibold text-slate-900">
-                            {formatearFecha(
-                              evento.fecha_evento
-                            )}
-                          </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-900">
+                              {formatearFecha(
+                                evento.fecha_evento
+                              )}
+                            </p>
+
+                          </div>
+
+                          <div className="rounded-xl bg-slate-50 p-4 text-center">
+
+                            <p className="text-xs font-medium uppercase text-slate-400">
+                              Hora
+                            </p>
+
+                            <p className="mt-1 text-sm font-semibold text-slate-900">
+                              {formatearHora(
+                                evento.hora_evento
+                              )}
+                            </p>
+
+                          </div>
 
                         </div>
 
-                        <div className="rounded-xl bg-slate-50 p-4 text-center">
-
-                          <p className="text-xs font-medium uppercase text-slate-400">
-                            Hora
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold text-slate-900">
-                            {formatearHora(
-                              evento.hora_evento
-                            )}
-                          </p>
-
-                        </div>
-
-                      </div>
-
-                      {/*
+                        {/*
                        * ACCIONES
                        */}
-                      <div className="mt-auto pt-6">
+                        <div className="mt-auto pt-6">
 
-                        {yaRegistrado ? (
-                          <>
-                            <button
-                              type="button"
-                              disabled
-                              className="w-full cursor-not-allowed rounded-xl bg-green-100 px-5 py-3 font-semibold text-green-700"
-                            >
-                              Ya estás inscrito a este evento
-                            </button>
+                          {yaRegistrado ? (
+                            <>
+                              <button
+                                type="button"
+                                disabled
+                                className="w-full cursor-not-allowed rounded-xl bg-green-100 px-5 py-3 font-semibold text-green-700"
+                              >
+                                Ya estás inscrito a este evento
+                              </button>
 
+                              <Link
+                                to="/mis-eventos"
+                                className="mt-3 block text-center text-sm font-semibold text-[#1B396A] transition hover:opacity-80"
+                              >
+                                Ver mi código QR
+                              </Link>
+                            </>
+                          ) : (
                             <Link
-                              to="/mis-eventos"
-                              className="mt-3 block text-center text-sm font-semibold text-[#1B396A] transition hover:opacity-80"
+                              to={`/evento/${evento.codigo_evento}`}
+                              className="block w-full rounded-xl bg-[#1B396A] px-5 py-3 text-center font-semibold text-white transition hover:opacity-90"
                             >
-                              Ver mi código QR
+                              Registrarme
                             </Link>
-                          </>
-                        ) : (
-                          <Link
-                            to={`/evento/${evento.codigo_evento}`}
-                            className="block w-full rounded-xl bg-[#1B396A] px-5 py-3 text-center font-semibold text-white transition hover:opacity-90"
-                          >
-                            Registrarme
-                          </Link>
-                        )}
+                          )}
 
-                      </div>
+                        </div>
 
-                    </article>
-                  );
-                }
-              )}
+                      </article>
+                    );
+                  }
+                )}
 
-            </div>
-          </>
-        )}
+              </div>
+            </>
+          )}
 
       </main>
 
