@@ -1,0 +1,29 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Habilitar pnpm
+RUN corepack enable && \
+    corepack prepare pnpm@11.24.0 --activate
+
+# Primero copiamos archivos de dependencias
+COPY package.json pnpm-lock.yaml ./
+
+# Solo dependencias necesarias en producción
+RUN pnpm install --prod --frozen-lockfile
+
+# Backend
+COPY server.js ./
+COPY server ./server
+COPY api ./api
+
+ENV NODE_ENV=production
+ENV PORT=3001
+
+EXPOSE 3001
+
+# Comprobar que la API esté funcionando
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://localhost:3001/api/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+
+CMD ["node", "server.js"]

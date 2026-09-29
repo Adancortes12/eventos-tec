@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "node --env-file=.env.local server.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -12,7 +13,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
     "@tailwindcss/vite": "^4.3.3",
+    "express": "^5.2.1",
     "html5-qrcode": "^2.3.8",
+    "pg": "^8.23.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
