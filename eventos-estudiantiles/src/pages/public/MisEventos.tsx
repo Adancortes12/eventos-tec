@@ -62,14 +62,14 @@ export default function MisEventos() {
     setError,
   ] = useState("");
 
-  
+
 
   const [
     qrAbierto,
     setQrAbierto,
   ] = useState<string | null>(null);
 
-  
+
 
   useEffect(() => {
     async function cargarEventos() {
@@ -101,7 +101,7 @@ export default function MisEventos() {
         if (!respuesta.ok) {
           setError(
             datos.error ??
-              "No se pudieron cargar tus eventos."
+            "No se pudieron cargar tus eventos."
           );
 
           return;
@@ -192,7 +192,7 @@ export default function MisEventos() {
               🔒
             </div>
 
-            <h1 className="mt-5 text-2xl font-bold text-slate-900">
+            <h1 className="mt-5 text-2xl font-bold !text-[#1F2937]">
               Inicia sesión
             </h1>
 
@@ -264,26 +264,26 @@ export default function MisEventos() {
          */}
         {!error &&
           eventos.length === 0 && (
-          <div className="mt-8 rounded-3xl bg-white p-10 text-center shadow-sm">
+            <div className="mt-8 rounded-3xl bg-white p-10 text-center shadow-sm">
 
-            <h2 className="text-xl font-bold text-slate-800">
-              Aún no tienes eventos
-            </h2>
+              <h2 className="text-xl font-bold text-slate-800">
+                Aún no tienes eventos
+              </h2>
 
-            <p className="mt-2 text-slate-500">
-              Cuando te inscribas a un evento,
-              aparecerá aquí junto con tu QR.
-            </p>
+              <p className="mt-2 text-slate-500">
+                Cuando te inscribas a un evento,
+                aparecerá aquí junto con tu QR.
+              </p>
 
-            <Link
-              to="/"
-              className="mt-6 inline-block rounded-xl bg-[#1B396A] px-5 py-3 font-semibold text-white hover:opacity-90"
-            >
-              Ver eventos disponibles
-            </Link>
+              <Link
+                to="/"
+                className="mt-6 inline-block rounded-xl bg-[#1B396A] px-5 py-3 font-semibold text-white hover:opacity-90"
+              >
+                Ver eventos disponibles
+              </Link>
 
-          </div>
-        )}
+            </div>
+          )}
 
         {/*
          * LISTA DE EVENTOS
@@ -375,7 +375,7 @@ export default function MisEventos() {
                       </div>
 
                       {qrAbierto ===
-                      inscripcion.inscripcionId ? (
+                        inscripcion.inscripcionId ? (
                         <div className="mt-6">
 
                           <div className="flex justify-center rounded-2xl border border-slate-200 bg-white p-5">
