@@ -19,6 +19,7 @@ export default function handler(req, res) {
     res.status(500).json({
       error:
         "Faltan variables de configuración de SIITEC.",
+      env: process.env
     });
 
     return;

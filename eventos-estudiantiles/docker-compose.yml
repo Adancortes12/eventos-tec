@@ -1,7 +1,6 @@
 services:
   database:
     image: postgres:16-alpine
-    container_name: eventos-database
     restart: unless-stopped
 
     environment:
@@ -31,28 +30,41 @@ services:
       context: .
       dockerfile: Dockerfile.backend
 
-    container_name: eventos-backend
     restart: unless-stopped
 
     env_file:
-      - .env.local
-      - .env.docker
+      - path: .env.local
+        required: false
+      - path: .env.docker
+        required: false
 
     environment:
-      PORT: 3001
       DB_HOST: database
       DB_PORT: 5432
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      APP_URL: ${APP_URL}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SIITEC_CLIENT_ID: ${SIITEC_CLIENT_ID}
+      SIITEC_CLIENT_SECRET: ${SIITEC_CLIENT_SECRET}
+      SIITEC_AUTHORIZATION_ENDPOINT: ${SIITEC_AUTHORIZATION_ENDPOINT}
+      SIITEC_REVOCATION_ENDPOINT: ${SIITEC_REVOCATION_ENDPOINT}
+      SIITEC_TOKEN_ENDPOINT: ${SIITEC_TOKEN_ENDPOINT}
+      SIITEC_USERINFO_ENDPOINT: ${SIITEC_USERINFO_ENDPOINT}
+      SIITEC_USUARIOS_ENDPOINT: ${SIITEC_USUARIOS_ENDPOINT}
 
     ports:
-      - "3001:3001"
+      - "${BACKEND_HTTP:-20080}:3001"
+      - "${BACKEND_HTTPS:-20443}:3443"
 
     depends_on:
       database:
         condition: service_healthy
 
     networks:
-      - frontend-network
       - backend-network
+      - public
 
 
   frontend:
@@ -60,28 +72,26 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
 
-    container_name: eventos-frontend
     restart: unless-stopped
 
     ports:
-      - "3000:80"
+      - "${FRONTEND_HTTP:-10080}:80"
+      - "${FRONTEND_HTTPS:-10443}:443"
 
     depends_on:
       backend:
         condition: service_healthy
 
     networks:
-      - frontend-network
+      - public
 
 
 volumes:
   postgres_data:
-    name: eventos-postgres-data
 
 
 networks:
-  frontend-network:
-    name: eventos-frontend-network
-
+  public:
+    name: public
+    external: true
   backend-network:
-    name: eventos-backend-network

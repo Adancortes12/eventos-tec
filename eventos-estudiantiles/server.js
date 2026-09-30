@@ -1,3 +1,5 @@
+import https from 'https';
+import fs from 'fs';
 import express from "express";
 import dashboard from "./server/eventos/dashboard.js";
 import { db } from "./server/lib/db.js";
@@ -20,9 +22,11 @@ import sitecMe from "./api/sitec/me.js";
 
 const app = express();
 
-const PORT = Number(
-  process.env.PORT || 3001
-);
+const PORT = Number(process.env.PORT || 3001);
+const HTTPS_PORT = Number(process.env.HTTPS_PORT || 3443);
+
+const HTTPS_SERVER_KEY_FILE = '/app/certs/server.key';
+const HTTPS_SERVER_CRT_FILE = '/app/certs/server.crt';
 
 /*
  * BODY
@@ -277,3 +281,14 @@ app.listen(
     );
   }
 );
+
+if (fs.existsSync(HTTPS_SERVER_KEY_FILE) && fs.existsSync(HTTPS_SERVER_CRT_FILE)) {
+  const httpsOptions = {
+    key: fs.readFileSync(HTTPS_SERVER_KEY_FILE),
+    cert: fs.readFileSync(HTTPS_SERVER_CRT_FILE)
+  };
+
+  https.createServer(httpsOptions, app).listen(HTTPS_PORT, () => {
+    console.log(`Listening on https://localhost:${HTTPS_PORT}`);
+  });
+}

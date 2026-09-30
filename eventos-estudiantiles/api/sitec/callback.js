@@ -50,7 +50,6 @@ export default async function handler(
       SIITEC_USERINFO_ENDPOINT,
       SIITEC_USUARIOS_ENDPOINT,
     } = process.env;
-
     if (
       !SIITEC_CLIENT_ID ||
       !SIITEC_CLIENT_SECRET ||
