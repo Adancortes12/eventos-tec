@@ -11,8 +11,9 @@ export default async function handler(req, res) {
     /*
      * EVENTOS DISPONIBLES
      *
-     * PostgreSQL compara directamente
-     * contra la hora actual del servidor.
+     * Las fechas se convierten explícitamente
+     * a texto para mantener el formato que
+     * espera el frontend.
      */
     const resultado = await db.query(`
       SELECT
@@ -20,21 +21,32 @@ export default async function handler(req, res) {
         codigo_evento,
         nombre,
         descripcion,
-        fecha_evento,
+
+        TO_CHAR(
+          fecha_evento,
+          'YYYY-MM-DD'
+        ) AS fecha_evento,
+
         hora_evento,
+
         estado,
+
         TO_CHAR(
           fecha_activacion,
           'YYYY-MM-DD"T"HH24:MI:SS'
         ) AS fecha_activacion,
+
         TO_CHAR(
           cierre_inscripcion,
           'YYYY-MM-DD"T"HH24:MI:SS'
         ) AS cierre_inscripcion
+
       FROM eventos
+
       WHERE estado = 'activo'
         AND fecha_activacion <= LOCALTIMESTAMP
         AND cierre_inscripcion >= LOCALTIMESTAMP
+
       ORDER BY
         fecha_evento ASC,
         hora_evento ASC
