@@ -442,7 +442,7 @@ export default function Dashboard() {
                       "activo" && (
                       <Link
                         to={`/admin/eventos/${evento.id}/escanear`}
-                        className="rounded-lg bg-[#1B396A] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                        className="rounded-lg bg-[#1B396A] px-4 py-2 text-sm font-semibold !text-white transition hover:opacity-90"
                       >
                         Pasar asistencia
                       </Link>

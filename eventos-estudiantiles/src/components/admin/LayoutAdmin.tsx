@@ -89,16 +89,21 @@ export default function LayoutAdmin() {
   }, [navigate, location.pathname]);
 
   /*
-   * PERMISOS
-   */
-  const puedeCrearEventos = usuario?.rol === "superadmin";
+ * PERMISOS
+ */
+const puedeCrearEventos =
+  usuario?.rol === "admin" ||
+  usuario?.rol === "superadmin";
 
-  const puedeGestionarEventos =
-    usuario?.rol === "admin" || usuario?.rol === "superadmin";
+const puedeGestionarEventos =
+  usuario?.rol === "admin" ||
+  usuario?.rol === "superadmin";
 
-  const puedeVerDashboard = true;
+const puedeVerDashboard = true;
 
-  const puedeAdministrarMaestros = usuario?.rol === "superadmin";
+const puedeAdministrarMaestros =
+  usuario?.rol === "superadmin";
+  
   /*
    * ABRIR NUEVO EVENTO
    */

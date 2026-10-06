@@ -158,18 +158,19 @@ export default async function handler(
       });
     }
 
-    /*
-     * SOLO SUPERADMIN
-     */
-    if (
-      maestro.rol_sistema !==
-      "superadmin"
-    ) {
-      return res.status(403).json({
-        error:
-          "Solo un superadministrador puede crear eventos.",
-      });
-    }
+   /*
+ * SOLO ADMIN Y SUPERADMIN
+ */
+const puedeCrearEvento =
+  maestro.rol_sistema === "admin" ||
+  maestro.rol_sistema === "superadmin";
+
+if (!puedeCrearEvento) {
+  return res.status(403).json({
+    error:
+      "No tienes permisos para crear eventos.",
+  });
+}
 
     /*
      * 3. DATOS RECIBIDOS

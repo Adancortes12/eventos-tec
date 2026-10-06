@@ -1,112 +1,800 @@
 @import "tailwindcss";
+
+/* =========================================================
+   EVENTOS ESTUDIANTILES - TECNM
+   ESTILOS GLOBALES
+========================================================= */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* =======================================================
+     COLORES INSTITUCIONALES
+  ======================================================= */
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --tecnm-blue: #1b396a;
+  --tecnm-blue-hover: #15305b;
+  --tecnm-blue-dark: #102747;
+  --tecnm-blue-soft: #e8eef7;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  /* =======================================================
+     FONDOS
+  ======================================================= */
+
+  --bg-main: #e9edf2;
+  --bg-secondary: #f1f3f5;
+  --bg-card: #f8fafc;
+  --bg-card-hover: #f1f5f9;
+
+  --bg-dark: #020817;
+  --bg-dark-soft: #0f172a;
+  --bg-dark-hover: #1e293b;
+
+  /* =======================================================
+     TEXTO
+  ======================================================= */
+
+  --text-main: #111827;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --text-light: #f8fafc;
+  --text-white: #ffffff;
+
+  /* =======================================================
+     BORDES
+  ======================================================= */
+
+  --border: #d6dde5;
+  --border-dark: #334155;
+
+  /* =======================================================
+     ESTADOS
+  ======================================================= */
+
+  --success: #15803d;
+  --success-bg: #dcfce7;
+
+  --danger: #b91c1c;
+  --danger-bg: #fee2e2;
+
+  --warning: #a16207;
+  --warning-bg: #fef3c7;
+
+  /* =======================================================
+     SOMBRAS
+  ======================================================= */
+
+  --shadow-sm:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 1px 3px rgba(15, 23, 42, 0.08);
+
+  --shadow-md:
+    0 4px 8px rgba(15, 23, 42, 0.08),
+    0 2px 4px rgba(15, 23, 42, 0.06);
+
+  --shadow-lg:
+    0 12px 24px rgba(15, 23, 42, 0.12);
+
+  /* =======================================================
+     FUENTE
+  ======================================================= */
+
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /*
+   * IMPORTANTE:
+   * Evitamos que Chrome/Windows cambie automáticamente
+   * nuestros colores por tener el sistema en modo oscuro.
+   */
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
+/* =========================================================
+   RESET GENERAL
+========================================================= */
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+
+  background: var(--bg-main);
 }
 
 body {
   margin: 0;
+  padding: 0;
+
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+
+  background:
+    linear-gradient(
+      180deg,
+      #eef1f5 0%,
+      #e7ebf0 100%
+    );
+
+  color: var(--text-main);
 }
+
+
+/* =========================================================
+   ROOT DE REACT
+========================================================= */
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+  padding: 0;
+
+  background: transparent;
+
+  color: var(--text-main);
+}
+
+
+/* =========================================================
+   TIPOGRAFÍA
+========================================================= */
 
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+
+  font-family: inherit;
+  font-weight: 700;
+
+  color: inherit;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
 p {
-  margin: 0;
+  margin-top: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
+a {
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   COLOR DE TEXTO GENERAL
+========================================================= */
+
+.text-white {
+  color: #ffffff !important;
+}
+
+.text-black {
+  color: #000000 !important;
+}
+
+.text-slate-950 {
+  color: #020617 !important;
+}
+
+.text-slate-900 {
+  color: #0f172a !important;
+}
+
+.text-slate-800 {
+  color: #1e293b !important;
+}
+
+.text-slate-700 {
+  color: #334155 !important;
+}
+
+.text-slate-600 {
+  color: #475569 !important;
+}
+
+.text-slate-500 {
+  color: #64748b !important;
+}
+
+.text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+.text-gray-700 {
+  color: #374151 !important;
+}
+
+.text-gray-600 {
+  color: #4b5563 !important;
+}
+
+
+/* =========================================================
+   BOTONES AZULES TECNM
+========================================================= */
+
+/*
+ * Esta parte corrige específicamente el problema
+ * de botones azules con letras negras.
+ */
+
+button.bg-\[\#1B396A\],
+a.bg-\[\#1B396A\] {
+  background-color: #1b396a !important;
+  color: #ffffff !important;
+}
+
+button.bg-\[\#1B396A\]:hover,
+a.bg-\[\#1B396A\]:hover {
+  background-color: #15305b !important;
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   BOTONES OSCUROS
+========================================================= */
+
+button.bg-slate-950,
+a.bg-slate-950,
+button.bg-slate-900,
+a.bg-slate-900,
+button.bg-slate-800,
+a.bg-slate-800,
+button.bg-slate-700,
+a.bg-slate-700 {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   BOTONES VERDES / ROJOS
+========================================================= */
+
+button.bg-green-600,
+a.bg-green-600 {
+  color: #ffffff !important;
+}
+
+button.bg-red-600,
+a.bg-red-600 {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SUPERFICIES CLARAS
+========================================================= */
+
+.bg-white {
+  background-color: #f8fafc !important;
+}
+
+.bg-slate-50 {
+  background-color: #f8fafc !important;
+}
+
+.bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+
+
+/* =========================================================
+   SUPERFICIES OSCURAS
+========================================================= */
+
+.bg-slate-950 {
+  background-color: #020817 !important;
+}
+
+.bg-slate-900 {
+  background-color: #0f172a !important;
+}
+
+.bg-slate-800 {
+  background-color: #1e293b !important;
+}
+
+
+/* =========================================================
+   TARJETAS
+========================================================= */
+
+.card {
+  background: var(--bg-card);
+  color: var(--text-main);
+
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.card:hover {
+  border-color: #c5ced8;
+
+  box-shadow: var(--shadow-md);
+}
+
+
+/* =========================================================
+   BOTÓN TECNM REUTILIZABLE
+========================================================= */
+
+.btn-tecnm {
   display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 10px 18px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: var(--tecnm-blue) !important;
+  color: #ffffff !important;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.btn-tecnm:hover {
+  background: var(--tecnm-blue-hover) !important;
+  color: #ffffff !important;
+
+  box-shadow: var(--shadow-md);
+}
+
+.btn-tecnm:active {
+  transform: translateY(1px);
+}
+
+
+/* =========================================================
+   BOTÓN SECUNDARIO
+========================================================= */
+
+.btn-secondary {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 10px 18px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+
+  background: #f8fafc !important;
+  color: #1e293b !important;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #eef2f6 !important;
+
+  border-color: #94a3b8;
+
+  color: #0f172a !important;
+}
+
+
+/* =========================================================
+   LINKS SOBRE FONDOS OSCUROS
+========================================================= */
+
+.bg-slate-950 a,
+.bg-slate-900 a,
+.bg-slate-800 a {
+  color: inherit;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+input,
+select,
+textarea {
+  background-color: #ffffff;
+  color: #111827;
+
+  border-color: #cbd5e1;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #e2e8f0;
+
+  color: #64748b;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   FORM CONTROL
+========================================================= */
+
+.form-control {
+  width: 100%;
+
+  padding: 11px 14px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #111827;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--tecnm-blue);
+
+  box-shadow:
+    0 0 0 3px rgba(27, 57, 106, 0.12);
+
+  outline: none;
+}
+
+
+/* =========================================================
+   FOCUS
+========================================================= */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--tecnm-blue);
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   ESTADO ACTIVO
+========================================================= */
+
+.estado-activo {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 5px 14px;
+
+  border-radius: 999px;
+
+  background: var(--success-bg);
+  color: var(--success);
+
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   ESTADO FINALIZADO
+========================================================= */
+
+.estado-finalizado {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 5px 14px;
+
+  border-radius: 999px;
+
+  background: #e2e8f0;
+  color: #475569;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   COLORES DE ESTADO TAILWIND
+========================================================= */
+
+.bg-green-100 {
+  background-color: #dcfce7 !important;
+}
+
+.text-green-700 {
+  color: #15803d !important;
+}
+
+.text-green-600 {
+  color: #16a34a !important;
+}
+
+.bg-red-50 {
+  background-color: #fef2f2 !important;
+}
+
+.text-red-600 {
+  color: #dc2626 !important;
+}
+
+
+/* =========================================================
+   TABLAS
+========================================================= */
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  color: #1f2937;
+}
+
+thead {
+  background: #e9edf2;
+}
+
+th {
+  color: #334155;
+
+  font-weight: 700;
+}
+
+th,
+td {
+  padding: 14px 16px;
+
+  text-align: left;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+tbody tr {
+  background: #f8fafc;
+}
+
+tbody tr:hover {
+  background: #f1f5f9;
+}
+
+
+/* =========================================================
+   MODALES
+========================================================= */
+
+.modal-backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 100;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(2, 8, 23, 0.65);
+
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 650px;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: #f8fafc;
+  color: #111827;
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+
+  box-shadow: var(--shadow-lg);
+}
+
+
+/* =========================================================
+   SELECCIÓN DE TEXTO
+========================================================= */
+
+::selection {
+  background: var(--tecnm-blue);
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+
+/* =========================================================
+   CONTADOR
+========================================================= */
+
+.counter {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 12px;
+
+  border: 1px solid #cbd7e8;
+  border-radius: 8px;
+
+  background: var(--tecnm-blue-soft);
+
+  color: var(--tecnm-blue);
+
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.counter:hover {
+  background: #dee7f3;
+
+  border-color: var(--tecnm-blue);
+}
+
+
+/* =========================================================
+   LINKS TECNM
+========================================================= */
+
+.link-tecnm {
+  color: var(--tecnm-blue) !important;
+
+  font-weight: 600;
+
+  text-decoration: none;
+}
+
+.link-tecnm:hover {
+  color: var(--tecnm-blue-hover) !important;
+
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1024px) {
+  :root {
+    font-size: 16px;
+  }
+
+  .card {
+    border-radius: 16px;
+  }
+
+  .modal-content {
+    max-width: 95%;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    border-radius: 14px;
+  }
+
+  .btn-tecnm,
+  .btn-secondary {
+    padding: 10px 14px;
+  }
+
+  th,
+  td {
+    padding: 12px;
+  }
 }
